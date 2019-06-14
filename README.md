@@ -9,6 +9,9 @@ To clone repository, run both of the following commands:
 # Initial clone
 git clone https://github.com/MorrellLAB/morex_reference.git
 
+# Go into Github repo
+cd morex_reference
+
 # After initial clone, pull submodules
 # You only need to run this once
 git submodule update --init --recursive
