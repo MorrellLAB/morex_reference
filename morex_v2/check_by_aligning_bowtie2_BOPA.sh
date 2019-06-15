@@ -14,7 +14,7 @@ module load bowtie2/2.3.4.1
 
 # User provided input arguments
 FASTA_FILE=/panfs/roc/groups/9/morrellp/shared/Datasets/Genotyping/Contextual_Sequences/BOPA_SNPs/BOPA_SNPs.fasta
-DB_NAME=/panfs/roc/groups/9/morrellp/shared/References/Reference_Sequences/Barley/Morex_v2/Barley_Morex_V2_pseudomolecules
+DB_NAME=/panfs/roc/groups/9/morrellp/shared/References/Reference_Sequences/Barley/Morex_v2/Barley_Morex_V2_pseudomolecules_db
 OUT_PREFIX=BOPA_contextual_morex_v2-bowtie2
 OUT_DIR=~/scratch/barley_ref
 
