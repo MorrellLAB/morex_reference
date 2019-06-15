@@ -20,7 +20,7 @@ cd ${REF_DIR}
 PREFIX=$(basename ${REF_FILENAME} .fasta)
 
 # Create bowtie2 index database
-bowtie2-build ${REF_DIR}/${REF_FILENAME} ${PREFIX}
+bowtie2-build ${REF_DIR}/${REF_FILENAME} ${PREFIX}_db
 
 # Check the content of the database
-bowtie2-inspect -n ${PREFIX}
+bowtie2-inspect -n ${PREFIX}_db
