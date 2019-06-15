@@ -4,6 +4,9 @@
 #PBS -M liux1299@umn.edu
 #PBS -q mesabi
 
+set -e
+set -o pipefail
+
 module load bowtie2/2.3.4.1
 
 # User provided input arguments

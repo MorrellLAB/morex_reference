@@ -4,6 +4,9 @@
 #PBS -M liux1299@umn.edu
 #PBS -q mesabi
 
+set -e
+set -o pipefail
+
 module load bwa/0.7.17
 
 # User provided input arguments
