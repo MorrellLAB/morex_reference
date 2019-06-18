@@ -36,7 +36,26 @@ Falcon Heights, MN
 - Created .fai index using `samtools faidx` (samtools 1.7)
 - Downloaded the centromere positions from the link below:
 https://doi.ipk-gatersleben.de/DOI/83e8e186-dc4b-47f7-a820-28ad37cb176b/7ffd0036-13e6-49be-89fd-27c0e77b0ae0/0/
-- Made bed file by hand using centromere positions from above and chromosome lengths from .fai index (parts_with_plastids.bed) 
+- Made bed file by hand using centromere positions from above and chromosome lengths from .fai index (parts_with_plastids.bed)
 - Broke up reference with plastids into chromosome arms using the following command:
 `bedtools getfasta -name -fi Barley_Morex_V2_pseudomolecules_plastids.fasta -fo Barley_Morex_V2_pseudomolecules_parts_plastids.fasta -bed parts_with_plastids.bed`
+
+Chaochih Liu
+18 June 2019
+Falcon Heights, MN
+
+Broke up pseudomolecules reference (no plastids) into chromosome arms using the following command:
+
+```bash
+# Split reference into parts
+module load bedtools_ML/2.28.0
+bedtools getfasta -name -fi Barley_Morex_V2_pseudomolecules.fasta -fo Barley_Morex_V2_pseudomolecules_parts.fasta -bed parts.bed
+
+# Index parts reference
+module load samtools/1.9
+samtools faidx Barley_Morex_V2_pseudomolecules_parts.fasta
+
+# BWA indexing
+qsub make_index_parts_bwa.sh
+```
 
