@@ -1,0 +1,1 @@
+Consensus map from Morex x Barke iSelect SNP (Comadran et al. 2012) and mapped POPA SNPs from Munoz-Amatriain et al, The Plant Genome (2011) 4:328 . This map is being made available before publication and users should cite the map as Munoz-Amatriain et al. (in preparation)
