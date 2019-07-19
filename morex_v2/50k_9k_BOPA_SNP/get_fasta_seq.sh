@@ -4,10 +4,13 @@ set -e
 set -o pipefail
 
 # User provided input arguments
+# Full filepath to list of SNPs, one SNP name per line
 SNP_LIST=$1
 # File extension of SNP_LIST. Ex: .log, .txt
 SNP_LIST_EXT=$2
+# Full filepath to contextual sequences for SNPs
 CONTEXTUAL_FASTA=$3
+# Full filepath to our output directory
 OUT_DIR=$4
 
 # Check if out dir exists, if not make it
