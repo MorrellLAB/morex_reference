@@ -4,7 +4,7 @@ set -e
 set -o pipefail
 
 # User provided input arguments
-# Full filepath to list of SNPs, one SNP name per line
+# List of SNPs, one SNP name per line
 SNP_LIST=$1
 # File extension of SNP_LIST. Ex: .log, .txt
 SNP_LIST_EXT=$2
