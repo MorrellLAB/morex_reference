@@ -1,3 +1,4 @@
 # Files to ignore
 *.DS_Store
 *error_files
+settings.json
