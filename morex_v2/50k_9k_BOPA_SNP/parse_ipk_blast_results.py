@@ -182,20 +182,15 @@ def pick_best_hit(current_snp, context_snp_seq):
         # If elem is not the last index
         if elem != score_idx[-1]:
             tmp_query_seq = cat_query_seq(snp_hit_split[0][score_idx[i]:score_idx[i+1]])
-            print(tmp_query_seq)
             if context_snp_seq in tmp_query_seq:
-                print("SNP is in the query sequence of this hit")
                 score_start_idx = score_idx[i]
                 score_end_idx = score_idx[i+1]
                 break
         else:
             # We are at the last element or have only one hit
             # for this chromosome. Go until the end
-            #print(snp_hit_split[0][score_idx[i]:])
             tmp_query_seq = cat_query_seq(snp_hit_split[0][score_idx[i]:])
-            print(tmp_query_seq)
             if context_snp_seq in tmp_query_seq:
-                print("SNP is in the query sequence of this hit")
                 score_start_idx = score_idx[i]
                 score_end_idx = len(snp_hit_split[0]) - 1
                 break
@@ -241,21 +236,21 @@ def plus_minus_strand(query_snp, ref_allele, iupac_table):
                 # We only consider 2 nucleotides case
                 if elem != ref_allele:
                     alt_allele.append(elem)
-            print("Ref allele:", ref_allele)
-            print("Alt allele:", alt_allele)
+            # print("Ref allele:", ref_allele)
+            # print("Alt allele:", alt_allele)
         else:
             # For alt allele, use the one that is not the ref allele
             for i, elem in enumerate(iupac_table[query_snp][0]):
                 # We only consider 2 nucleotides case
                 if elem != ref_allele:
                     alt_allele = elem
-            print("Ref allele:", ref_allele)
-            print("Alt allele:", alt_allele)
+            # print("Ref allele:", ref_allele)
+            # print("Alt allele:", alt_allele)
     # Now, take the reverse complement
     rc_ref_allele = Seq(ref_allele, generic_dna).reverse_complement()[0]
-    print("Rev comp ref allele:", rc_ref_allele)
+    # print("Rev comp ref allele:", rc_ref_allele)
     rc_alt_allele = Seq(alt_allele, generic_dna).reverse_complement()[0]
-    print("Rev comp alt allele:", rc_alt_allele)
+    # print("Rev comp alt allele:", rc_alt_allele)
     return (rc_ref_allele, rc_alt_allele)
 
 
@@ -320,10 +315,10 @@ def extract_info(snp_name, current_best_hit, fasta_dict):
             # Identify alternate allele
             alt_allele = plus_plus_strand(query_snp, ref_allele, IUPAC_TABLE)
         else:
-            print("Could not resolve position for SNP", snp_name, ", saving to log file\n")
+            print("Could not resolve position for SNP", snp_name, "\n")
             # Add code here to save SNP to log file
     elif strand == "Plus/Minus":
-        print("coordinates are reversed")
+        # print("coordinates are reversed")
         if query_seq.find(context_seq) != -1:
             # Return the leftmost index of the context_seq + floor(len(context_seq)/2)
             qsnp_idx = query_seq.find(context_seq) + math.floor(len(context_seq)/2)
@@ -331,7 +326,7 @@ def extract_info(snp_name, current_best_hit, fasta_dict):
             # Now, we have the index for the SNP
             # Let's get the associated position in the reference (Sbjct)
             ref_allele = sbjct_seq[qsnp_idx]
-            print("Ref", ref_allele)
+            # print("Ref", ref_allele)
             # Count number of indels that occur prior to SNP
             num_indels = sbjct_seq[:qsnp_idx].count('-')
             # To get the correct reference position, we need to add the number of indels
@@ -339,10 +334,10 @@ def extract_info(snp_name, current_best_hit, fasta_dict):
             subject_pos = int(sbjct_start_pos) - qsnp_idx + num_indels
             # Identify alternate allele and take reverse complement
             ref_allele, alt_allele = plus_minus_strand(query_snp, ref_allele, IUPAC_TABLE)
-            print("RC Ref", ref_allele)
-            print("RC Alt", alt_allele)
+            # print("RC Ref", ref_allele)
+            # print("RC Alt", alt_allele)
     else:
-        print("Strand is Minus/Plus, saving to log file...")
+        print("Strand is Minus/Plus for SNP", snp_name, "\n")
     # Save VCF line
     return [chrom, str(subject_pos), snp_name, ref_allele, alt_allele, qual, filter_field, info_field]
 
