@@ -76,6 +76,7 @@ def context_snp_win(fasta_dict, snp_name):
     # Generate 7bp window containing SNP
     # This is case insensitive
     if fasta_dict[snp_name][mid_context_snpidx].upper() not in IUPAC_TABLE.keys():
+        print(snp_name)
         print("Middle of sequence is not the SNP, move left/right until we identify the SNP")
         # Move left from center until we find SNP
         for i in range(mid_context_snpidx, 0, -1):
@@ -94,9 +95,18 @@ def context_snp_win(fasta_dict, snp_name):
                 rsnp_idx = i
                 break
         # Identify the position closest to center to use as SNP
-        cand_snp_idx = [lsnp_idx, rsnp_idx]
-        context_snpidx = closest(cand_snp_idx, mid_context_snpidx)
-        context_seq = ''.join(fasta_dict[snp_name][context_snpidx-3: context_snpidx+4])
+        # It's possible there is no SNP left of the midpoint, check this
+        try:
+            lsnp_idx
+        except NameError:
+            print("No SNP left of midpoint")
+            # Since we only have a SNP right of the midpoint, use that as SNP
+            context_snpidx = rsnp_idx
+            context_seq = ''.join(fasta_dict[snp_name][context_snpidx-3: context_snpidx+4])
+        else:
+            cand_snp_idx = [lsnp_idx, rsnp_idx]
+            context_snpidx = closest(cand_snp_idx, mid_context_snpidx)
+            context_seq = ''.join(fasta_dict[snp_name][context_snpidx-3: context_snpidx+4])
     else:
         # Center position is the SNP
         context_snpidx = mid_context_snpidx
@@ -178,11 +188,13 @@ def pick_best_hit(current_snp, context_snp_seq):
     # For each chr, the best hits are also sorted by E-value by default
     # So, we can create a range of indices to process
     # We will pick the best hit that contains the SNP
+    log = []
     for i, elem in enumerate(score_idx):
         # If elem is not the last index
         if elem != score_idx[-1]:
             tmp_query_seq = cat_query_seq(snp_hit_split[0][score_idx[i]:score_idx[i+1]])
-            if context_snp_seq in tmp_query_seq:
+            log.append(context_snp_seq in tmp_query_seq.upper())
+            if context_snp_seq in tmp_query_seq.upper():
                 score_start_idx = score_idx[i]
                 score_end_idx = score_idx[i+1]
                 break
@@ -190,14 +202,21 @@ def pick_best_hit(current_snp, context_snp_seq):
             # We are at the last element or have only one hit
             # for this chromosome. Go until the end
             tmp_query_seq = cat_query_seq(snp_hit_split[0][score_idx[i]:])
-            if context_snp_seq in tmp_query_seq:
+            log.append(context_snp_seq in tmp_query_seq.upper())
+            if context_snp_seq in tmp_query_seq.upper():
                 score_start_idx = score_idx[i]
                 score_end_idx = len(snp_hit_split[0]) - 1
                 break
-    # Save chr and length info first
-    best_hit = snp_hit_split[0][0:2]
-    # Then add best hit containing SNP
-    best_hit.extend(snp_hit_split[0][score_start_idx:score_end_idx])
+    # Check if we found the context_snp_seq in at least one of the tmp_query_seq
+    if True in log:
+        # Save chr and length info first
+        best_hit = snp_hit_split[0][0:2]
+        # Then add best hit containing SNP
+        best_hit.extend(snp_hit_split[0][score_start_idx:score_end_idx])
+    else:
+        print("Cannot resolve SNP:", current_snp[0].split()[1])
+        unresolved = ["NoHit", current_snp[0].split()[1]]
+        best_hit = '\t'.join(unresolved)
     # if len(score_idx) > 1:
     #     best_hit.append(snp_hit_split[0][score_start_idx:score_end_idx])
     # else:
@@ -256,6 +275,7 @@ def plus_minus_strand(query_snp, ref_allele, iupac_table):
 
 def extract_info(snp_name, current_best_hit, fasta_dict):
     """ """
+    print(snp_name)
     # Save chromosome info
     chrom = current_best_hit[0].strip('>').strip()
     # Save percent identity info
@@ -290,8 +310,8 @@ def extract_info(snp_name, current_best_hit, fasta_dict):
     qual = str('.')
     filter_field = str('.')
     # Concatenate the sequences
-    query_seq = "".join(query_seq_list)
-    sbjct_seq = "".join(sbjct_seq_list)
+    query_seq = "".join(query_seq_list).upper()
+    sbjct_seq = "".join(sbjct_seq_list).upper()
     # Keep starting position of subject (ref)
     sbjct_start_pos = ",".join(current_best_hit[sbjct_idx[0]].split()).split(',')[1]
     # Find the physical position of the SNP in the reference
@@ -367,19 +387,33 @@ def main(FASTA, BLAST_RESULTS_HTML, OUT_FILE):
     for i, elem in enumerate(fasta_dict.keys()):
         tmp_context_snpidx, tmp_context_seq = context_snp_win(fasta_dict, elem)
         fasta_win_dict[elem] = [tmp_context_snpidx, tmp_context_seq]
+    print("Picking best hit for each SNP...")
+    # Start from clean log file, check if file exists
+    log_dir = os.path.dirname(OUT_FILE)
+    temp = [log_dir, "/unresolved_snps.log"]
+    log_filename = ''.join(temp)
+    if os.path.exists(os.path.expanduser(log_filename)):
+        os.remove(os.path.expanduser(log_filename))
     # Pick the best hit for each SNP using the pick_best_hit function
     bhs = {}
     for i, elem in enumerate(l):
         # Save current snp name
         csnp_name = elem[0].split()[1]
+        print(csnp_name)
         # Probably need to store the output from pick_best_hist somehow
         cbhs = pick_best_hit(current_snp=elem, context_snp_seq=fasta_win_dict[csnp_name][1])
-        # Add new dictionary key,value pair
-        bhs[csnp_name] = cbhs
+        if "NoHit" in cbhs:
+            # Save SNP to log file
+            with open(os.path.expanduser(log_filename), 'a') as f:
+                f.write(cbhs + "\n")
+        else:
+            # Add new dictionary key,value pair
+            bhs[csnp_name] = cbhs
     # Start from clean file, check if file exists
     if os.path.exists(os.path.expanduser(OUT_FILE)):
         os.remove(os.path.expanduser(OUT_FILE))
     # Extract info from best hit and save to file
+    print("Extracting relevant info...")
     with open(os.path.expanduser(OUT_FILE), 'a') as f:
         # Add header line
         f.write("\t".join(["#CHROM", "POS", "ID", "REF", "ALT", "QUAL", "FILTER", "INFO"]) + "\n")
@@ -387,6 +421,7 @@ def main(FASTA, BLAST_RESULTS_HTML, OUT_FILE):
             vcf_line = extract_info(snp_name=elem, current_best_hit=bhs[elem], fasta_dict=fasta_win_dict)
             # Save VCF line to file
             f.write("\t".join(vcf_line) + "\n")
+    print("Done.")
     return
 
 main(sys.argv[1], sys.argv[2], sys.argv[3])  # Run the program
