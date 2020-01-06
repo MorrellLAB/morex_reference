@@ -104,9 +104,17 @@ def context_snp_win(fasta_dict, snp_name):
             context_snpidx = rsnp_idx
             context_seq = ''.join(fasta_dict[snp_name][context_snpidx-3: context_snpidx+4])
         else:
-            cand_snp_idx = [lsnp_idx, rsnp_idx]
-            context_snpidx = closest(cand_snp_idx, mid_context_snpidx)
-            context_seq = ''.join(fasta_dict[snp_name][context_snpidx-3: context_snpidx+4])
+            try:
+                rsnp_idx
+            except NameError:
+                print("No SNP right of midpoint")
+                # Since we only have a SNP left of the midpoint, use that as SNP
+                context_snpidx = lsnp_idx
+                context_seq = ''.join(fasta_dict[snp_name][context_snpidx-3: context_snpidx+4])
+            else:
+                cand_snp_idx = [lsnp_idx, rsnp_idx]
+                context_snpidx = closest(cand_snp_idx, mid_context_snpidx)
+                context_seq = ''.join(fasta_dict[snp_name][context_snpidx-3: context_snpidx+4])
     else:
         # Center position is the SNP
         context_snpidx = mid_context_snpidx
@@ -326,7 +334,8 @@ def extract_info(snp_name, current_best_hit, fasta_dict):
             # Let's get the associated position in the reference (Sbjct)
             ref_allele = sbjct_seq[qsnp_idx]
             if ref_allele == "-":
-                print("Reference has an insertion, manually fix the position for SNP:", snp_name, "\n")
+                print("Reference has an insertion, please manually remove this SNP:", snp_name, "\n")
+                print("Contextual sequence: ", context_seq)
             # Count number of indels that occur prior to SNP
             num_indels = sbjct_seq[:qsnp_idx].count('-')
             # To get the correct reference position, we need to subtract the number of indels
