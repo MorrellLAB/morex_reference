@@ -23,10 +23,14 @@ SNP_ARR=($(cat ${SNP_LIST}))
 prefix=$(basename ${SNP_LIST} ${SNP_LIST_EXT})
 for i in ${SNP_ARR[@]}
 do
-    echo $i
-    # Identify line number of SNP in FASTA file
-    tmp_line=$(grep -n "\<${i}\>" ${CONTEXTUAL_FASTA} | cut -d':' -f 1)
-    tmp_seq_line=$[${tmp_line} + 1]
-    # Extract sequence associated with SNP
-    sed -n ${tmp_line},${tmp_seq_line}p ${CONTEXTUAL_FASTA} >> ${OUT_DIR}/${prefix}.fasta
+    if grep -n "\<${i}\>" ${CONTEXTUAL_FASTA}
+    then
+        # Identify line number of SNP in FASTA file
+        tmp_line=$(grep -n "\<${i}\>" ${CONTEXTUAL_FASTA} | cut -d':' -f 1)
+        tmp_seq_line=$[${tmp_line} + 1]
+        # Extract sequence associated with SNP
+        sed -n ${tmp_line},${tmp_seq_line}p ${CONTEXTUAL_FASTA} >> ${OUT_DIR}/${prefix}.fasta
+    else
+        echo "${i} not in contextual fasta file"
+    fi
 done
