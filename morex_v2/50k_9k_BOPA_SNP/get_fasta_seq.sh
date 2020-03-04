@@ -20,10 +20,10 @@ mkdir -p ${OUT_DIR}
 SNP_ARR=($(cat ${SNP_LIST}))
 
 # Extract sequence for SNPs
+prefix=$(basename ${SNP_LIST} ${SNP_LIST_EXT})
 for i in ${SNP_ARR[@]}
 do
     echo $i
-    prefix=$(basename ${SNP_LIST} ${SNP_LIST_EXT})
     # Identify line number of SNP in FASTA file
     tmp_line=$(grep -n "\<${i}\>" ${CONTEXTUAL_FASTA} | cut -d':' -f 1)
     tmp_seq_line=$[${tmp_line} + 1]
