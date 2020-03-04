@@ -23,7 +23,7 @@ SNP_ARR=($(cat ${SNP_LIST}))
 prefix=$(basename ${SNP_LIST} ${SNP_LIST_EXT})
 for i in ${SNP_ARR[@]}
 do
-    if grep -n "\<${i}\>" ${CONTEXTUAL_FASTA}
+    if grep -nq "\<${i}\>" ${CONTEXTUAL_FASTA}
     then
         # Identify line number of SNP in FASTA file
         tmp_line=$(grep -n "\<${i}\>" ${CONTEXTUAL_FASTA} | cut -d':' -f 1)
