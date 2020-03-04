@@ -184,9 +184,11 @@ sed -n '5637,5638p' BOPA_SNPs.fasta
 CTATTAGAGTCTTGTATATGTATTATATCATAGACAAAGCACACGAAATGATGTCCAGATYATTCTTCTTCTTCATCAGTCCACACGAGAGGTTTAAATTGTATATGTAAATCCAGAATTC
 ```
 
-Search from SNPMeta output file which gene this SNP is located because all the BOPA and 9K SNPs should be in genic regions only. For SNP 12_31124, there was no BLAST hit according to SNPMeta.
+Check if SNP hits a gene by searching in the SNPMeta output file `~/GitHub/morex_reference/morex_v2/data/bopa_and_9k_snpmeta_output.txt`. For all the BOPA and 9k SNPs, we expect these to only be in genic regions. If there is a gene hit, BLAST search the gene with IPK server using default settings.
 
-We will pick the smaller physical position on chr1H to use in the VCF and write notes in the INFO field of the VCF file for the other duplicates with the following format. Format from previous BOPA SNPs relative to Morex v1: https://github.com/lilei1/9k_BOPA_SNP/blob/617faed6534ddbf94c287636a068ac4c4f5b25c8/BOPA_9k_vcf_Morex_refv1/sorted_all_BOPA_masked_95idt.vcf
+For SNP 12_31124, there was no BLAST hit according to SNPMeta.
+
+Then pick pick the smaller physical position on chr1H to use in the VCF and write notes in the INFO field of the VCF file for the other duplicates with the following format. Format from previous BOPA SNPs relative to Morex v1: https://github.com/lilei1/9k_BOPA_SNP/blob/617faed6534ddbf94c287636a068ac4c4f5b25c8/BOPA_9k_vcf_Morex_refv1/sorted_all_BOPA_masked_95idt.vcf
 
 But we will list ALTCHR first before ALTPOS since that is the format that was already present in the current VCF file we are working with. Example:
 > ALTCHR=chr1H;ALTPOS=2525021;B
@@ -197,6 +199,10 @@ Example of full line (except in our case we will list ALTCHR first and ALTPOS se
 If there are more than 2 duplicates, we can format the INFO field as follows:
 > chr1H    479986322    11_21126    G    C    .    .    ALTPOS=151517613,188397002;ALTCHR=chrUn,chrUn;B
 
+Now, repeat this process to resolve remaining duplicates.
+
+**Step 3:** Rescue failed SNPs
+
 Here are the general rules the script uses for picking SNPs when they fail out of SNP_Utils:
 
 First, we will use the `BOPA_morex_v2_idt95_failed.fasta` file containing failed SNPs only and BLAST using the IPK server with the following parameters:
@@ -204,10 +210,6 @@ First, we will use the `BOPA_morex_v2_idt95_failed.fasta` file containing failed
 - Database(s): Barley Pseudomolecules Morex v2.0 2019
 
 We will do a basic search. This may take a minute or two. Next, we will save the page as an HTML file (we only want the HTML only and NOT the complete webpage), this file will be given as input to the script `parse_ipk_blast_results.py`.
-
-Now, repeat this process to resolve remaining duplicates.
-
-**Step 3:** Rescue failed SNPs
 
 Let's create a fasta file containing only the failed SNPs.
 
@@ -227,6 +229,11 @@ Use script to resolve failed SNPs.
 ```
 
 Manually check resolved SNPs, if reference allele is `-`, this allele needs to be removed since we cannot resolve this.
+
+```bash
+# In dir: ~/GitHub/morex_reference/morex_v2/50k_9k_BOPA_SNP/duplicates_and_failed
+grep -v "-" bopa_95idt_failed_resolved.vcf > bopa_95idt_failed_resolved_noIns.vcf
+```
 
 Append rescued failed SNPs to VCF and sort.
 
@@ -258,6 +265,7 @@ OUT_PREFIX=9k_morex_v2_idt90
 Summarizing SNPs:
 
 ```bash
+# In dir: ~/Shared/References/Reference_Sequences/Barley/Morex_v2/bopa_9k_50k
 # Total number of SNPs
 grep -v "#" 9k_morex_v2_idt90.vcf | cut -f 3 | wc -l
     7792
@@ -279,6 +287,9 @@ grep -v "#" 9k_morex_v2_idt90.vcf | cut -f 3 | sort | uniq -c | sort -n -r | hea
       3 SCRI_RS_69385
       3 SCRI_RS_69163
       3 SCRI_RS_235806
+
+# Save the duplicate SNP names to a file
+grep -v "#" 9k_morex_v2_idt90.vcf | cut -f 3 | sort | uniq -c | sort -n -r | grep -wv 1 | awk '{ print $2 }' | sort -V > 9k_duplicate_snp_names.txt
 ```
 
 After running `snp_utils.py`, we get:
@@ -287,6 +298,38 @@ After running `snp_utils.py`, we get:
 119 failed SNPs
 
 **Step 2:** Resolve duplicate SNPs
+
+Check if SNP hits a gene by searching in the SNPMeta output file `~/GitHub/morex_reference/morex_v2/data/bopa_and_9k_snpmeta_output.txt`. For all the BOPA and 9k SNPs, we expect these to only be in genic regions. If there is a gene hit, BLAST search the gene with IPK server using default settings.
+
+```bash
+# In dir: ~/GitHub/morex_reference/morex_v2/50k_9k_BOPA_SNP/duplicates_and_failed
+# Generate a list of SNP names that hit a gene
+grep -f 9k_duplicate_snp_names.txt ../../data/bopa_and_9k_snpmeta_output.txt | cut -f 1 | sort -V > temp_9k_dup_in_snpmeta_output.txt
+
+wc -l temp_9k_dup_in_snpmeta_output.txt 
+      62 temp_9k_dup_in_snpmeta_output.txt
+
+wc -l 9k_duplicate_snp_names.txt 
+      63 9k_duplicate_snp_names.txt
+
+# Figure out which SNP did not hit a gene
+grep -vf temp_9k_dup_in_snpmeta_output.txt 9k_duplicate_snp_names.txt 
+    BK_02
+```
+
+Generate a list of contextual sequences with the duplicate SNPs for the IPK blast search.
+
+```bash
+# In dir: ~/Shared/References/Reference_Sequences/Barley/Morex_v2/bopa_9k_50k
+~/GitHub/morex_reference/morex_v2/50k_9k_BOPA_SNP/get_fasta_seq.sh \
+    9k_duplicate_snp_names.txt \
+    .txt \
+    ~/Shared/Datasets/Genotyping/Contextual_Sequences/BOPA_and_9k_SCRI_SNPs.fasta \
+    ~/Shared/References/Reference_Sequences/Barley/Morex_v2/bopa_9k_50k
+
+# Output message
+BK_02 not in contextual fasta file
+```
 
 **Step 3:** Rescue failed SNPs
 
@@ -320,6 +363,19 @@ Use script to resolve failed SNPs.
     ~/GitHub/morex_reference/morex_v2/50k_9k_BOPA_SNP/duplicates_and_failed/9k_morex_v2_idt90_failed.fasta \
     ~/GitHub/morex_reference/morex_v2/50k_9k_BOPA_SNP/duplicates_and_failed/IPK_BLAST_9k_90idt_failed.html \
     ~/GitHub/morex_reference/morex_v2/50k_9k_BOPA_SNP/duplicates_and_failed/9k_90idt_failed_resolved.vcf
+```
+
+Manually check resolved SNPs, if reference allele is `-`, this allele needs to be removed since we cannot resolve this.
+
+```bash
+# In dir: ~/GitHub/morex_reference/morex_v2/50k_9k_BOPA_SNP/duplicates_and_failed
+grep -v "-" 9k_90idt_failed_resolved.vcf > 9k_90idt_failed_resolved_noIns.vcf
+```
+
+Append rescued failed SNPs to VCF and sort.
+
+```bash
+
 ```
 
 ### Methods: 50k iSelect
