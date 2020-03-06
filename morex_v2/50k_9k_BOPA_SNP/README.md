@@ -378,6 +378,9 @@ Manually check resolved SNPs, if reference allele is `-`, this allele needs to b
 ```bash
 # In dir: ~/GitHub/morex_reference/morex_v2/50k_9k_BOPA_SNP/duplicates_and_failed
 grep -v "-" 9k_90idt_failed_resolved.vcf > 9k_90idt_failed_resolved_noIns.vcf
+
+# Save list of snps we could not resolve.
+grep "-" 9k_90idt_failed_resolved.vcf > 9k_90idt_ref_deletion.vcf
 ```
 
 Append duplicate SNPs and rescued failed SNPs to VCF and sort.
@@ -391,6 +394,8 @@ grep "#" 9k_morex_v2_idt90.vcf > 9k_morex_v2_idt90_sorted.vcf
 # Sort VCF
 grep -v "#" 9k_morex_v2_idt90.vcf | sort -k1,2 -V >> 9k_morex_v2_idt90_sorted.vcf
 ```
+
+Cleanup, move intermediate files in `duplicates_and_failed` directory to subdirectory called `intermediates`.
 
 ### Methods: 50k iSelect
 
