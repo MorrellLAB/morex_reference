@@ -2,6 +2,16 @@
 
 This directory contains the scripts used to re-map the BOPA, 9k iSelect, and 50k iSelect SNPs to the Morex v2 reference genome.
 
+### Navigation: Jump to Section
+
+- [Data](#data)
+- [Data exploration](#data-exploration)
+- [Methods: BOPA](#methods:-bopa)
+- [Methods: 9k iSelect](#methods:-9k-iselect)
+- [Methods: 50k iSelect](#methods:-50k-iselect)
+
+---
+
 ## Data
 
 All contextual fasta sequences for BOPA, 9k, and 50k are located in:
@@ -396,6 +406,13 @@ grep -v "#" 9k_morex_v2_idt90.vcf | sort -k1,2 -V >> 9k_morex_v2_idt90_sorted.vc
 ```
 
 Cleanup, move intermediate files in `duplicates_and_failed` directory to subdirectory called `intermediates`.
+
+On MSI, copy final sorted VCF to `/panfs/roc/groups/9/morrellp/shared/References/Reference_Sequences/Barley/Morex_v2/bopa_9k_50k`.
+
+```bash
+# In dir: ~/GitHub/morex_reference/morex_v2/50k_9k_BOPA_SNP
+cp *_sorted.vcf /panfs/roc/groups/9/morrellp/shared/References/Reference_Sequences/Barley/Morex_v2/bopa_9k_50k
+```
 
 ### Methods: 50k iSelect
 
