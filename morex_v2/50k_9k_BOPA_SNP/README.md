@@ -111,6 +111,8 @@ For the genetic map data, do some cleanup.
 git rm GeneticMap_iSelect_9k.txt
 ```
 
+---
+
 ### Methods: BOPA
 
 `BOPA_morex_v2_idt95.vcf` stores all of the BOPA SNPs mapped to the Morex v2 reference genome. It includes **xxx** SNPs out of 3,072 contextual sequences because we cannot figure out the position of the remaining **xx** SNPs due to deletions in the reference or the SNPs were not located in the matched region when we BLAST the contextual sequence against the Morex v2 reference genome. Below, I have detailed the steps we ran to produce the VCF files.
@@ -253,6 +255,8 @@ tail -n +2 duplicates_and_failed/bopa_95idt_failed_resolved_noIns.vcf >> BOPA_mo
 grep "#" BOPA_morex_v2_idt95.vcf > BOPA_morex_v2_idt95_sorted.vcf
 grep -v "#" BOPA_morex_v2_idt95.vcf | sort -V -k1,2 >> BOPA_morex_v2_idt95_sorted.vcf
 ```
+
+---
 
 ### Methods: 9k iSelect
 
@@ -413,6 +417,8 @@ On MSI, copy final sorted VCF to `/panfs/roc/groups/9/morrellp/shared/References
 # In dir: ~/GitHub/morex_reference/morex_v2/50k_9k_BOPA_SNP
 cp *_sorted.vcf /panfs/roc/groups/9/morrellp/shared/References/Reference_Sequences/Barley/Morex_v2/bopa_9k_50k
 ```
+
+---
 
 ### Methods: 50k iSelect
 
