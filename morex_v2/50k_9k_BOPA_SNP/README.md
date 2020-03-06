@@ -6,9 +6,9 @@ This directory contains the scripts used to re-map the BOPA, 9k iSelect, and 50k
 
 - [Data](#data)
 - [Data exploration](#data-exploration)
-- [Methods: BOPA](#methods:-bopa)
-- [Methods: 9k iSelect](#methods:-9k-iselect)
-- [Methods: 50k iSelect](#methods:-50k-iselect)
+- [Methods: BOPA](#methods-bopa)
+- [Methods: 9k iSelect](#methods-9k-iselect)
+- [Methods: 50k iSelect](#methods-50k-iselect)
 
 ---
 
