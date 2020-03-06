@@ -184,11 +184,11 @@ sed -n '5637,5638p' BOPA_SNPs.fasta
 CTATTAGAGTCTTGTATATGTATTATATCATAGACAAAGCACACGAAATGATGTCCAGATYATTCTTCTTCTTCATCAGTCCACACGAGAGGTTTAAATTGTATATGTAAATCCAGAATTC
 ```
 
-Check if SNP hits a gene by searching in the SNPMeta output file `~/GitHub/morex_reference/morex_v2/data/bopa_and_9k_snpmeta_output.txt`. For all the BOPA and 9k SNPs, we expect these to only be in genic regions. If there is a gene hit, BLAST search the gene with IPK server using default settings.
+Check if SNP hits a gene by searching in the SNPMeta output file `~/GitHub/morex_reference/morex_v2/data/bopa_and_9k_snpmeta_output.txt`. his step is intended to reduce noise since we expect all the BOPA and 9k SNPs to only be in genic regions. If there is a gene hit, BLAST search the gene with IPK server using default settings. If there is a gene hit, BLAST search the gene with IPK server using default settings. (**Note:** See 9k step 2 section for a more automated way of doing this).
 
-For SNP 12_31124, there was no BLAST hit according to SNPMeta.
+For SNP 12_31124, there was no BLAST hit according to SNPMeta. In this case, we pick the smaller physical position on chr1H to use in the VCF and write notes in the INFO field of the VCF file for the other duplicates with the following format. Format from previous BOPA SNPs relative to Morex v1: https://github.com/lilei1/9k_BOPA_SNP/blob/617faed6534ddbf94c287636a068ac4c4f5b25c8/BOPA_9k_vcf_Morex_refv1/sorted_all_BOPA_masked_95idt.vcf
 
-Then pick pick the smaller physical position on chr1H to use in the VCF and write notes in the INFO field of the VCF file for the other duplicates with the following format. Format from previous BOPA SNPs relative to Morex v1: https://github.com/lilei1/9k_BOPA_SNP/blob/617faed6534ddbf94c287636a068ac4c4f5b25c8/BOPA_9k_vcf_Morex_refv1/sorted_all_BOPA_masked_95idt.vcf
+More generally, IPK blast search the SNP fasta sequences and pick the best hit to resolve duplicate. If there is no gene for a SNP (e.g., BK_02) or the blast search has multiple identical/equally good results, we will choose the smaller (left) position and put notes in the Info field.
 
 But we will list ALTCHR first before ALTPOS since that is the format that was already present in the current VCF file we are working with. Example:
 > ALTCHR=chr1H;ALTPOS=2525021;B
@@ -299,10 +299,13 @@ After running `snp_utils.py`, we get:
 
 **Step 2:** Resolve duplicate SNPs
 
-Check if SNP hits a gene by searching in the SNPMeta output file `~/GitHub/morex_reference/morex_v2/data/bopa_and_9k_snpmeta_output.txt`. For all the BOPA and 9k SNPs, we expect these to only be in genic regions. If there is a gene hit, BLAST search the gene with IPK server using default settings.
+Check if SNP hits a gene by searching in the SNPMeta output file `~/GitHub/morex_reference/morex_v2/data/bopa_and_9k_snpmeta_output.txt`. This step is intended to reduce noise since we expect all the BOPA and 9k SNPs to only be in genic regions. If there is a gene hit, BLAST search the gene with IPK server using default settings.
 
 ```bash
 # In dir: ~/GitHub/morex_reference/morex_v2/50k_9k_BOPA_SNP/duplicates_and_failed
+# Save duplicate SNPs in snp meta output file
+head -n 1 ../../data/bopa_and_9k_snpmeta_output.txt > snpmeta_output_9k_duplicates_only.txt
+grep -f 9k_duplicate_snp_names.txt ../../data/bopa_and_9k_snpmeta_output.txt >> snpmeta_output_9k_duplicates_only.txt
 # Generate a list of SNP names that hit a gene
 grep -f 9k_duplicate_snp_names.txt ../../data/bopa_and_9k_snpmeta_output.txt | cut -f 1 | sort -V > temp_9k_dup_in_snpmeta_output.txt
 
@@ -329,7 +332,14 @@ Generate a list of contextual sequences with the duplicate SNPs for the IPK blas
 
 # Output message
 BK_02 not in contextual fasta file
+
+# Create a VCF file containing only the duplicate SNPs
+grep -f 9k_duplicate_snp_names.txt 9k_morex_v2_idt90.vcf | sort -k3,3 > 9k_duplicates_idt90.vcf
 ```
+
+IPK blast search the SNP fasta sequences and pick the best hit to resolve duplicate. If there is no gene for a SNP (e.g., BK_02) or the blast search has multiple identical/equally good results, we will choose the smaller (left) position and put notes in the Info field of the file `9k_duplicates_idt90_resolved.vcf`.
+
+Placeholder: `ALTCHR=;ALTPOS=;`
 
 **Step 3:** Rescue failed SNPs
 
