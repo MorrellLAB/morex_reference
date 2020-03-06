@@ -339,8 +339,6 @@ grep -f 9k_duplicate_snp_names.txt 9k_morex_v2_idt90.vcf | sort -k3,3 > 9k_dupli
 
 IPK blast search the SNP fasta sequences and pick the best hit to resolve duplicate. If there is no gene for a SNP (e.g., BK_02) or the blast search has multiple identical/equally good results, we will choose the smaller (left) position and put notes in the Info field of the file `9k_duplicates_idt90_resolved.vcf`.
 
-Placeholder: `ALTCHR=;ALTPOS=;`
-
 **Step 3:** Rescue failed SNPs
 
 Following the same procedure as the BOPA SNPs, we "manually" blast using the IPK server https://webblast.ipk-gatersleben.de/barley_ibsc/.
@@ -382,10 +380,16 @@ Manually check resolved SNPs, if reference allele is `-`, this allele needs to b
 grep -v "-" 9k_90idt_failed_resolved.vcf > 9k_90idt_failed_resolved_noIns.vcf
 ```
 
-Append rescued failed SNPs to VCF and sort.
+Append duplicate SNPs and rescued failed SNPs to VCF and sort.
 
 ```bash
+# In dir: ~/GitHub/morex_reference/morex_v2/50k_9k_BOPA_SNP
+cat duplicates_and_failed/9k_duplicates_idt90_resolved.vcf duplicates_and_failed/9k_90idt_failed_resolved_noIns.vcf | grep -v "#" >> 9k_morex_v2_idt90.vcf
 
+# Save header lines
+grep "#" 9k_morex_v2_idt90.vcf > 9k_morex_v2_idt90_sorted.vcf 
+# Sort VCF
+grep -v "#" 9k_morex_v2_idt90.vcf | sort -k1,2 -V >> 9k_morex_v2_idt90_sorted.vcf
 ```
 
 ### Methods: 50k iSelect
