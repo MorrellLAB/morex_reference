@@ -196,7 +196,7 @@ sed -n '5637,5638p' BOPA_SNPs.fasta
 CTATTAGAGTCTTGTATATGTATTATATCATAGACAAAGCACACGAAATGATGTCCAGATYATTCTTCTTCTTCATCAGTCCACACGAGAGGTTTAAATTGTATATGTAAATCCAGAATTC
 ```
 
-Check if SNP hits a gene by searching in the SNPMeta output file `~/GitHub/morex_reference/morex_v2/data/bopa_and_9k_snpmeta_output.txt`. his step is intended to reduce noise since we expect all the BOPA and 9k SNPs to only be in genic regions. If there is a gene hit, BLAST search the gene with IPK server using default settings. If there is a gene hit, BLAST search the gene with IPK server using default settings. (**Note:** See 9k step 2 section for a more automated way of doing this).
+Check if SNP hits a gene by searching in the SNPMeta output file `~/GitHub/morex_reference/morex_v2/data/bopa_and_9k_snpmeta_output.txt`. This step is intended to reduce noise since we expect all the BOPA and 9k SNPs to only be in genic regions. If there is a gene hit, BLAST search the gene with IPK server using default settings. If there is a gene hit, BLAST search the gene with IPK server using default settings. (**Note:** See 9k step 2 section for a more automated way of doing this).
 
 For SNP 12_31124, there was no BLAST hit according to SNPMeta. In this case, we pick the smaller physical position on chr1H to use in the VCF and write notes in the INFO field of the VCF file for the other duplicates with the following format. Format from previous BOPA SNPs relative to Morex v1: https://github.com/lilei1/9k_BOPA_SNP/blob/617faed6534ddbf94c287636a068ac4c4f5b25c8/BOPA_9k_vcf_Morex_refv1/sorted_all_BOPA_masked_95idt.vcf
 
@@ -323,14 +323,14 @@ grep -f 9k_duplicate_snp_names.txt ../../data/bopa_and_9k_snpmeta_output.txt >> 
 # Generate a list of SNP names that hit a gene
 grep -f 9k_duplicate_snp_names.txt ../../data/bopa_and_9k_snpmeta_output.txt | cut -f 1 | sort -V > temp_9k_dup_in_snpmeta_output.txt
 
-wc -l temp_9k_dup_in_snpmeta_output.txt 
+wc -l temp_9k_dup_in_snpmeta_output.txt
       62 temp_9k_dup_in_snpmeta_output.txt
 
-wc -l 9k_duplicate_snp_names.txt 
+wc -l 9k_duplicate_snp_names.txt
       63 9k_duplicate_snp_names.txt
 
 # Figure out which SNP did not hit a gene
-grep -vf temp_9k_dup_in_snpmeta_output.txt 9k_duplicate_snp_names.txt 
+grep -vf temp_9k_dup_in_snpmeta_output.txt 9k_duplicate_snp_names.txt
     BK_02
 ```
 
@@ -404,7 +404,7 @@ Append duplicate SNPs and rescued failed SNPs to VCF and sort.
 cat duplicates_and_failed/9k_duplicates_idt90_resolved.vcf duplicates_and_failed/9k_90idt_failed_resolved_noIns.vcf | grep -v "#" >> 9k_morex_v2_idt90.vcf
 
 # Save header lines
-grep "#" 9k_morex_v2_idt90.vcf > 9k_morex_v2_idt90_sorted.vcf 
+grep "#" 9k_morex_v2_idt90.vcf > 9k_morex_v2_idt90_sorted.vcf
 # Sort VCF
 grep -v "#" 9k_morex_v2_idt90.vcf | sort -k1,2 -V >> 9k_morex_v2_idt90_sorted.vcf
 ```
@@ -417,6 +417,45 @@ On MSI, copy final sorted VCF to `/panfs/roc/groups/9/morrellp/shared/References
 # In dir: ~/GitHub/morex_reference/morex_v2/50k_9k_BOPA_SNP
 cp *_sorted.vcf /panfs/roc/groups/9/morrellp/shared/References/Reference_Sequences/Barley/Morex_v2/bopa_9k_50k
 ```
+
+Check to see if there are any duplicates in the final file
+
+```bash
+# In dir: ~/GitHub/morex_reference/morex_v2/50k_9k_BOPA_SNP
+grep -v "#" 9k_morex_v2_idt90_sorted.vcf | cut -f 3 | sort | uniq -c | sort -n -r | grep -vw "1" | awk '{ print $2 }' > temp_remaining_9k_duplicates.txt
+
+grep -wf temp_remaining_9k_duplicates.txt 9k_morex_v2_idt90_sorted.vcf | sort -Vk3,3 > temp_9k_duplicates_to_fix.vcf
+
+cp temp_9k_duplicates_to_fix.vcf temp_9k_fixed_duplicates.vcf
+```
+
+We will manually fix these in the file `temp_9k_fixed_duplicates.vcf`. Then, we will fix these duplicates in the VCF file.
+
+```bash
+# In dir: ~/GitHub/morex_reference/morex_v2/50k_9k_BOPA_SNP
+# Remove the duplicate SNPs first
+grep -vf temp_9k_duplicates_to_fix.vcf 9k_morex_v2_idt90_sorted.vcf > temp_9k_morex_v2_idt90_sorted.vcf
+# Now, append the fixed duplicate SNPs
+cat temp_9k_fixed_duplicates.vcf >> temp_9k_morex_v2_idt90_sorted.vcf
+# Sort VCF file
+grep "#" temp_9k_morex_v2_idt90_sorted.vcf > 9k_morex_v2_idt90_sorted.vcf
+grep -v "#" temp_9k_morex_v2_idt90_sorted.vcf | sort -Vk1,2 >> 9k_morex_v2_idt90_sorted.vcf
+# Check for duplicates one more time
+grep -v "#" 9k_morex_v2_idt90_sorted.vcf | cut -f 3 | sort | uniq -c | sort -n -r | grep -vw "1"
+# Cleanup
+rm temp_*
+```
+
+**Step 4:** Check for BOPA and 9k position concordance
+
+Make sure all SNP positions are concordant.
+
+```bash
+# In dir: ~/GitHub/morex_reference/morex_v2/50k_9k_BOPA_SNP
+./check_position_concordance.py BOPA_morex_v2_idt95_sorted.vcf 9k_morex_v2_idt90_sorted.vcf > temp_discordant_bopa_9k_snps.txt
+```
+
+Since there are some discordant SNP positions, we will manually fix these.
 
 ---
 
@@ -459,7 +498,6 @@ grep -v "#" 50k_morex_v2_idt90.vcf | cut -f 3 | wc -l
 
 # Total number of unique SNPs
 grep -v "#" 50k_morex_v2_idt90.vcf | cut -f 3 | sort -u | wc -l
-
 
 # Total number of duplicates
 # Note: Need to run head -n 65 to see all duplicates, not showing here to save space
