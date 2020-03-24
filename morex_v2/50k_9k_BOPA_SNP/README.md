@@ -8,11 +8,14 @@ This directory contains the scripts used to re-map the BOPA, 9k iSelect, and 50k
 - [Data exploration](#data-exploration)
 - [Methods: BOPA](#methods-bopa)
 - [Methods: 9k iSelect](#methods-9k-iselect)
+- [Check overlapping BOPA and 9k iSelect SNPs](#check-overlapping-bopa-and-9k-iselect-snps)
 - [Methods: 50k iSelect](#methods-50k-iselect)
 
 ---
 
 ## Data
+
+The barley 50k iSelect SNP array data is published in [Bayer et al. 2017 Frontiers Plant Science](https://doi.org/10.3389/fpls.2017.01792). The 50k data can be [downloaded here](https://ics.hutton.ac.uk/50k/index.pl).
 
 All contextual fasta sequences for BOPA, 9k, and 50k are located in:
 
@@ -120,47 +123,63 @@ git rm GeneticMap_iSelect_9k.txt
 **Step 1:** Run SNP_Utils (https://github.com/mojaveazure/SNP_Utils)
 
 ```bash
-# In dir: ~/Shared/References/Reference_Sequences/Barley/Morex_v2
- ~/software_development/SNP_Utils/snp_utils.py CONFIG -d Barley_Morex_V2_pseudomolecules.fasta -k -i 95 -c blast_morex_v2_idt95
+module load python3/3.6.3_anaconda5.0.1
+# In dir: ~/Shared/References/Reference_Sequences/Barley/Morex_v2/bopa_9k_50k/intermediates
+#~/software_development/SNP_Utils/snp_utils.py CONFIG -d ../../Barley_Morex_V2_pseudomolecules.fasta -k -i 95 -c blast_bopa_morex_v2_idt95
+~/software_development/SNP_Utils/snp_utils.py CONFIG -d ../../Barley_Morex_V2_pseudomolecules.fasta -k -i 90 -c blast_bopa_morex_v2_idt90
 
 # Define variables for files
 LOOKUP_TABLE=/panfs/roc/groups/9/morrellp/liux1299/GitHub/morex_reference/lookup_tables/BOPA_lookup.txt
 GENETIC_MAP=/panfs/roc/groups/9/morrellp/liux1299/GitHub/morex_reference/genetic_maps/BOPA/2013_iSelect_Genetic_Map.txt
-OUT_PREFIX=BOPA_morex_v2_idt95
+#OUT_PREFIX=BOPA_morex_v2_idt95
+OUT_PREFIX=BOPA_morex_v2_idt90
 
 # Run SNP Utils BLAST
-~/software_development/SNP_Utils/snp_utils.py BLAST -l ${LOOKUP_TABLE} -c blast_morex_v2_idt95 -b -m ${GENETIC_MAP} -d -t 100000 -o ${OUT_PREFIX}
+#~/software_development/SNP_Utils/snp_utils.py BLAST -l ${LOOKUP_TABLE} -c blast_bopa_morex_v2_idt95 -b -m ${GENETIC_MAP} -d -t 100000 -o ${OUT_PREFIX}
+~/software_development/SNP_Utils/snp_utils.py BLAST -l ${LOOKUP_TABLE} -c blast_bopa_morex_v2_idt90 -b -m ${GENETIC_MAP} -d -t 100000 -o ${OUT_PREFIX}
 ```
 
-Summarizing SNPs:
+Originally we used a 95 identity threshold but then found that for some overlapping SNPs between the BOPA and 9k sets, the BLAST results did not match and resulted in discordant positions. So, we reduced the identity threshold to 90.
+
+Summarizing SNPs for 95 identity threshold:
 
 ```bash
 # Total number of SNPs
 grep -v "#" BOPA_morex_v2_idt95.vcf | cut -f 3 | wc -l
     2992
-
 # Total number of unique SNPs
 grep -v "#" BOPA_morex_v2_idt95.vcf | cut -f 3 | sort -u | wc -l
     2985
-
 # Total number of duplicates
-grep -v "#" BOPA_morex_v2_idt95.vcf | cut -f 3 | sort | uniq -c | sort -n -r | head
-      3 12_31124
-      3 12_30822
-      2 12_30861
-      2 12_21135
-      2 11_20074
-      1 12_31536
-      1 12_31535
-      1 12_31529
-      1 12_31528
-      1 12_31527
+grep -v "#" BOPA_morex_v2_idt95.vcf | cut -f 3 | sort | uniq -c | sort -n -r | grep -vw "1" | wc -l
+    5
 ```
 
-After running `snp_utils.py`, we get:
-2,985 SNPs without duplicates
-5 SNPs with duplicates
-52 failed SNPs
+For 90idt:
+
+```bash
+# Total SNPs
+grep -v "#" BOPA_morex_v2_idt90.vcf | cut -f 3 | wc -l
+    3024
+# Total unique SNPs
+grep -v "#" BOPA_morex_v2_idt90.vcf | cut -f 3 | sort -u | wc -l
+    3017
+# Total number of duplicates
+grep -v "#" BOPA_morex_v2_idt90.vcf | cut -f 3 | sort | uniq -c | sort -n -r | grep -vw "1" | wc -l
+    5
+```
+
+After running `snp_utils.py` for 95idt, we get:
+
+- 2,985 SNPs without duplicates
+- 5 SNPs with duplicates
+- 52 failed SNPs
+
+For 90idt, we get:
+
+- 3,024 SNPs without duplicates
+- 5 SNPs with duplicates
+- 19 failed SNPs
 
 For the ones that failed, we "manually" BLAST using the IPK server: https://webblast.ipk-gatersleben.de/barley_ibsc/. Previously (for Morex v1), Li had many undergrads help us manually BLAST search the duplicate and failed SNPs. But, this is somewhat more prone to human error and is not possible without a many undergrads. So, we will use the script below to resolve the duplicates and failed SNPs by parsing an HTML file containg the IPK Barley BLAST server results.
 
@@ -263,9 +282,9 @@ grep -v "#" BOPA_morex_v2_idt95.vcf | sort -V -k1,2 >> BOPA_morex_v2_idt95_sorte
 **Step 1:** Run SNP_Utils (https://github.com/mojaveazure/SNP_Utils)
 
 ```bash
-# In dir: ~/Shared/References/Reference_Sequences/Barley/Morex_v2
+# In dir: ~/Shared/References/Reference_Sequences/Barley/Morex_v2/bopa_9k_50k/intermediates
 module load python3/3.6.3_anaconda5.0.1
-~/software_development/SNP_Utils/snp_utils.py CONFIG -d Barley_Morex_V2_pseudomolecules.fasta -k -i 90 -e 0.000001 -s 350 -c blast_9k_morex_v2_idt90
+~/software_development/SNP_Utils/snp_utils.py CONFIG -d ../../Barley_Morex_V2_pseudomolecules.fasta -k -i 90 -e 0.000001 -s 350 -c blast_9k_morex_v2_idt90
 
 # Define variables for files
 LOOKUP_TABLE=/panfs/roc/groups/9/morrellp/liux1299/GitHub/morex_reference/lookup_tables/9k_lookup.txt
@@ -289,18 +308,8 @@ grep -v "#" 9k_morex_v2_idt90.vcf | cut -f 3 | sort -u | wc -l
     7687
 
 # Total number of duplicates
-# Note: Need to run head -n 65 to see all duplicates, not showing here to save space
-grep -v "#" 9k_morex_v2_idt90.vcf | cut -f 3 | sort | uniq -c | sort -n -r | head
-     10 SCRI_RS_149262
-      9 SCRI_RS_10020
-      5 SCRI_RS_69139
-      5 SCRI_RS_4728
-      5 SCRI_RS_235421
-      4 SCRI_RS_167988
-      4 SCRI_RS_114487
-      3 SCRI_RS_69385
-      3 SCRI_RS_69163
-      3 SCRI_RS_235806
+grep -v "#" 9k_morex_v2_idt90.vcf | cut -f 3 | sort | uniq -c | sort -n -r | grep -vw "1" | wc -l
+    63
 
 # Save the duplicate SNP names to a file
 grep -v "#" 9k_morex_v2_idt90.vcf | cut -f 3 | sort | uniq -c | sort -n -r | grep -wv 1 | awk '{ print $2 }' | sort -V > 9k_duplicate_snp_names.txt
@@ -446,16 +455,34 @@ grep -v "#" 9k_morex_v2_idt90_sorted.vcf | cut -f 3 | sort | uniq -c | sort -n -
 rm temp_*
 ```
 
-**Step 4:** Check for BOPA and 9k position concordance
+---
 
-Make sure all SNP positions are concordant.
+### Check overlapping BOPA and 9k iSelect SNPs
+
+Check for BOPA and 9k position concordance
+
+Make sure all SNP positions for SNPs that overlap in the two sets are concordant.
 
 ```bash
 # In dir: ~/GitHub/morex_reference/morex_v2/50k_9k_BOPA_SNP
 ./check_position_concordance.py BOPA_morex_v2_idt95_sorted.vcf 9k_morex_v2_idt90_sorted.vcf > temp_discordant_bopa_9k_snps.txt
 ```
 
-Since there are some discordant SNP positions, we will manually fix these.
+Since there are some discordant SNP positions. To identify what is causing this, I will re-run SNP_Utils on the BOPA set using the same identity threshold as in the 9k set.
+
+```bash
+module load python3/3.6.3_anaconda5.0.1
+# In dir: ~/Shared/References/Reference_Sequences/Barley/Morex_v2/bopa_9k_50k/intermediates
+~/software_development/SNP_Utils/snp_utils.py CONFIG -d ../../Barley_Morex_V2_pseudomolecules.fasta -k -i 90 -c blast_bopa_morex_v2_idt90
+
+# Define variables for files
+LOOKUP_TABLE=/panfs/roc/groups/9/morrellp/liux1299/GitHub/morex_reference/lookup_tables/BOPA_lookup.txt
+GENETIC_MAP=/panfs/roc/groups/9/morrellp/liux1299/GitHub/morex_reference/genetic_maps/BOPA/2013_iSelect_Genetic_Map.txt
+OUT_PREFIX=BOPA_morex_v2_idt90
+
+# Run SNP Utils BLAST
+~/software_development/SNP_Utils/snp_utils.py BLAST -l ${LOOKUP_TABLE} -c blast_bopa_morex_v2_idt90 -b -m ${GENETIC_MAP} -d -t 100000 -o ${OUT_PREFIX}
+```
 
 ---
 
@@ -464,9 +491,9 @@ Since there are some discordant SNP positions, we will manually fix these.
 **Step 1:** Run SNP_Utils (https://github.com/mojaveazure/SNP_Utils)
 
 ```bash
-# In dir: ~/Shared/References/Reference_Sequences/Barley/Morex_v2
+# In dir: ~/Shared/References/Reference_Sequences/Barley/Morex_v2/bopa_9k_50k/intermediates
 module load python3/3.6.3_anaconda5.0.1
-~/software_development/SNP_Utils/snp_utils.py CONFIG -d Barley_Morex_V2_pseudomolecules.fasta -k -i 90 -e 0.000001 -s 350 -c blast_50k_morex_v2_idt90
+~/software_development/SNP_Utils/snp_utils.py CONFIG -d ../../Barley_Morex_V2_pseudomolecules.fasta -k -i 90 -e 0.000001 -s 350 -c blast_50k_morex_v2_idt90
 
 # In dir: ~/Shared/Datasets/Genotyping/Contextual_Sequences/barley_50k
 # Reformat lookup table for SNP Utils (sym linked in Github repo)
@@ -479,13 +506,67 @@ To get the genetic map, I downloaded it from Supplemental Table 3 [Bayer et al. 
 # In dir: /Users/chaochih/Downloads
 awk -F, '{ print $7,$3,$8 }' table3.csv | tail -n +2 > ~/GitHub/morex_reference/genetic_maps/50k_iSelect_Genetic_Map.txt
 
-# In dir: ~/Shared/References/Reference_Sequences/Barley/Morex_v2
+# In dir: ~/Shared/References/Reference_Sequences/Barley/Morex_v2/bopa_9k_50k/intermediates
 # Define variables for files
 LOOKUP_TABLE=/panfs/roc/groups/9/morrellp/shared/Datasets/Genotyping/Contextual_Sequences/barley_50k/snp_utils_50k_lookup_table.txt
+LOOKUP_TABLE=
 GENETIC_MAP=/panfs/roc/groups/9/morrellp/liux1299/GitHub/morex_reference/genetic_maps/50k_iSelect_Genetic_Map.txt
 OUT_PREFIX=50k_morex_v2_idt90
 
 # Run SNP Utils BLAST
+~/software_development/SNP_Utils/snp_utils.py BLAST -l ${LOOKUP_TABLE} -c blast_50k_morex_v2_idt90 -b -m ${GENETIC_MAP} -d -t 100000 -o ${OUT_PREFIX}
+```
+
+This SNP_Utils BLAST, resulted in the following error.
+
+```bash
+# Here are the relevant parts of the error message
+No reference allele for JHI-Hv50k-2016-132670:1.0566e-26, have you run Hsp.get_snp_position() yet?
+hmm JHI-Hv50k-2016-132670:6.4497e-14
+Traceback (most recent call last):
+  File "/home/morrellp/liux1299/software_development/SNP_Utils/snp_utils.py", line 285, in <module>
+    main()
+  File "/home/morrellp/liux1299/software_development/SNP_Utils/snp_utils.py", line 262, in main
+    snp_list, no_snps, ref_gen, bconf = blast_based(args, lookup_dict)
+  File "/home/morrellp/liux1299/software_development/SNP_Utils/snp_utils.py", line 103, in blast_based
+    hsp.add_snp(lookup=lookup)
+  File "/home/morrellp/liux1299/.local/lib/python3.6/site-packages/overload.py", line 181, in f
+    return callable(*usable_args, **_kw)
+  File "/panfs/roc/groups/9/morrellp/liux1299/software_development/SNP_Utils/Objects/blast.py", line 270, in add_snp
+    self.add_snp(this_snp=snp.SNP(lookup=lookup, hsp=self))
+  File "/home/morrellp/liux1299/.local/lib/python3.6/site-packages/overload.py", line 181, in f
+    return callable(*usable_args, **_kw)
+  File "/panfs/roc/groups/9/morrellp/liux1299/software_development/SNP_Utils/Objects/snp.py", line 103, in __init__
+    self._position = hsp.get_snp_position(lookup=lookup)
+  File "/home/morrellp/liux1299/.local/lib/python3.6/site-packages/overload.py", line 181, in f
+    return callable(*usable_args, **_kw)
+  File "/panfs/roc/groups/9/morrellp/liux1299/software_development/SNP_Utils/Objects/blast.py", line 235, in get_snp_position
+    expected=adj
+  File "/home/morrellp/liux1299/.local/lib/python3.6/site-packages/overload.py", line 181, in f
+    return callable(*usable_args, **_kw)
+  File "/panfs/roc/groups/9/morrellp/liux1299/software_development/SNP_Utils/Objects/blast.py", line 198, in get_snp_position
+    raise NoSNPError("Cannot find the SNP in " + self) # Error out to avoid infinite loops
+TypeError: must be str, not Hsp
+```
+
+For now, I will save the problem SNPs and come back to resolve them later on.
+
+```bash
+# In dir: ~/Shared/Datasets/Genotyping/Contextual_Sequences/barley_50k
+# Save SNP name
+grep JHI-Hv50k-2016-132670 snp_utils_50k_lookup_table.txt | cut -f 1 > snp_utils_50k_lookup_table-problem_snps.txt
+grep JHI-Hv50k-2016-210233 snp_utils_50k_lookup_table.txt | cut -f 1 >> snp_utils_50k_lookup_table-problem_snps.txt
+grep JHI-Hv50k-2016-451305 snp_utils_50k_lookup_table.txt | cut -f 1 >> snp_utils_50k_lookup_table-problem_snps.txt
+# Remove problem SNP from lookup table
+grep -vf snp_utils_50k_lookup_table-problem_snps.txt snp_utils_50k_lookup_table.txt > snp_utils_50k_lookup_table_filtered.txt
+
+# In dir: ~/Shared/References/Reference_Sequences/Barley/Morex_v2/bopa_9k_50k/intermediates
+# Define variables for files
+LOOKUP_TABLE=/panfs/roc/groups/9/morrellp/shared/Datasets/Genotyping/Contextual_Sequences/barley_50k/snp_utils_50k_lookup_table_filtered.txt
+GENETIC_MAP=/panfs/roc/groups/9/morrellp/liux1299/GitHub/morex_reference/genetic_maps/50k_iSelect_Genetic_Map.txt
+OUT_PREFIX=50k_morex_v2_idt90
+
+# Run SNP Utils BLAST using lookup table without problem snps
 ~/software_development/SNP_Utils/snp_utils.py BLAST -l ${LOOKUP_TABLE} -c blast_50k_morex_v2_idt90 -b -m ${GENETIC_MAP} -d -t 100000 -o ${OUT_PREFIX}
 ```
 
@@ -494,23 +575,43 @@ Summarizing SNPs:
 ```bash
 # Total number of SNPs
 grep -v "#" 50k_morex_v2_idt90.vcf | cut -f 3 | wc -l
-
+    44964
 
 # Total number of unique SNPs
 grep -v "#" 50k_morex_v2_idt90.vcf | cut -f 3 | sort -u | wc -l
+    43940
 
 # Total number of duplicates
-# Note: Need to run head -n 65 to see all duplicates, not showing here to save space
-grep -v "#" 50k_morex_v2_idt90.vcf | cut -f 3 | sort | uniq -c | sort -n -r | head
-
+grep -v "#" 50k_morex_v2_idt90.vcf | cut -f 3 | sort | uniq -c | sort -n -r | grep -vw "1" | wc -l
+    582
 ```
 
 After running `snp_utils.py`, we get:
-xxx SNPs without duplicates
-xx SNPs with duplicates
-xx failed SNPs
+43,940 Total SNPs (unique)
+582 SNPs with duplicates
+91 failed SNPs
 
 **Step 2:** Resolve duplicate SNPs
+
+For duplicates, the general procedure we will follow is to
+
+File preparation: Pull out only the duplicates to resolve and save to a file.
+
+```bash
+# In dir: ~/GitHub/morex_reference/morex_v2/50k_9k_BOPA_SNP
+# Create list of duplicate SNP names
+grep -v "#" 50k_morex_v2_idt90.vcf | cut -f 3 | sort | uniq -c | sort -n -r | grep -vw "1" | sed -e 's,   ,,' -e 's,  ,,' | cut -d' ' -f 2 | sort -V > duplicates_and_failed/50k_duplicate_snp_names.txt
+# Create temp vcf file containing only duplicate snp names
+grep -wf duplicates_and_failed/50k_duplicate_snp_names.txt 50k_morex_v2_idt90.vcf | sort -V -k1,2 | sort -V -k3,3 > duplicates_and_failed/50k_duplicates_only.vcf
+# Make a copy, we will resolve dup snps directly in this copy
+cp duplicates_and_failed/50k_duplicates_only.vcf duplicates_and_failed/for_mackenzie/50k_duplicates_resolved.vcf
+```
+
+Convert contextual sequence from [A/B] format to IUPAC codes so we can BLAST search the SNP with the [IPK server](https://webblast.ipk-gatersleben.de/barley_ibsc/).
+
+```bash
+
+```
 
 **Step 3:** Rescue failed SNPs
 
@@ -529,7 +630,7 @@ cat 9k_snp_SCRI/SCRI_SNPs.fasta >> BOPA_and_9k_SCRI_SNPs.fasta
     9k_morex_v2_idt90_failed.log \
     .log \
     ~/Shared/Datasets/Genotyping/Contextual_Sequences/BOPA_and_9k_SCRI_SNPs.fasta \
-    ~/Shared/References/Reference_Sequences/Barley/Morex_v2
+    ~/Shared/References/Reference_Sequences/Barley/Morex_v2/bopa_9k_50k/intermediates
 ```
 
 Then, we will use the `9k_morex_v2_idt90_failed.fasta` file containing failed SNPs only and BLAST using the IPK server with the following parameters:
