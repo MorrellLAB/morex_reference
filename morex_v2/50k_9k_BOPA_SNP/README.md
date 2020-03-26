@@ -610,7 +610,8 @@ cp duplicates_and_failed/50k_duplicates_only.vcf duplicates_and_failed/for_macke
 Convert contextual sequence from [A/B] format to IUPAC codes so we can BLAST search the SNP with the [IPK server](https://webblast.ipk-gatersleben.de/barley_ibsc/).
 
 ```bash
-
+# In dir: ~/GitHub/morex_reference/morex_v2/50k_9k_BOPA_SNP
+./snp_to_iupac_fasta.py ~/GitHub/morex_reference/lookup_tables/snp_utils_50k_lookup_table_filtered.txt > duplicates_and_failed/for_mackenzie/snp_utils_50k_lookup_table_filtered.fasta
 ```
 
 **Step 3:** Rescue failed SNPs
