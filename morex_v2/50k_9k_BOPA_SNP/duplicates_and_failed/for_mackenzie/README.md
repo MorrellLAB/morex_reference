@@ -23,7 +23,7 @@ If you found the fasta sequence from the NCBI protein database, use the followin
 - Program: `blastp`
 - Database(s): `Barley AA (HC and LC) Morex v2.0 2019`
 
-**Note:** Directly pasting the fasta sequence from NCBI may introduce weird spaces, make sure you remove these before searching.
+**Note:** Directly pasting the fasta sequence from NCBI may introduce weird spaces, make sure you remove these before searching. I also noticed through experimenting between blastn and blastp that blastp seems to be a little more accurate than blastn.
 
 Now, click `Basic search`.
 
