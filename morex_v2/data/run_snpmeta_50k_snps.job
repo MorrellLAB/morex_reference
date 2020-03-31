@@ -12,13 +12,63 @@ set -o pipefail
 # Dependencies
 module load python3/3.7.1_anaconda
 module load emboss/6.6.0
+module load parallel
 export PATH=${PATH}:/panfs/roc/groups/9/morrellp/liux1299/Software/SNPMeta
 
 # User provided input arguments
 FASTA=/panfs/roc/groups/9/morrellp/shared/Datasets/Genotyping/Contextual_Sequences/barley_50k/snpmeta_50k_snps.fasta
-EMAIL=liux1299@um.edu
-OUT_FILENAME=50k_snpmeta_output.txt
+EMAIL=liux1299@umn.edu
 OUT_DIR=/panfs/roc/groups/9/morrellp/liux1299/GitHub/morex_reference/morex_v2/data
 
-# Run program
-SNPMeta.py -f ${FASTA} -i -a ${EMAIL} --outfmt tabular > ${OUT_DIR}/${OUT_FILENAME}
+#-------------------
+# Check if out dir exists, if not make it
+mkdir -p ${OUT_DIR} ${OUT_DIR}/temp ${OUT_DIR}/temp_ann_split
+
+# Make sure we start with clean temp directories
+rm ${OUT_DIR}/temp/*
+rm ${OUT_DIR}/temp_ann_split/*
+
+# Prepare files for running in parallel
+SNP_ARR=($(grep ">" ${FASTA} | sed -e 's,>,,'))
+
+function split_fasta() {
+    local snp=$1
+    local fasta_file=$2
+    local out_dir=$3
+    # Identify line number of fasta file
+    tmp_line=$(grep -n "\<${snp}\>" ${fasta_file} | cut -d':' -f 1)
+    tmp_seq_line=$[${tmp_line} + 1]
+    # Extract sequence associated with SNP
+    sed -n ${tmp_line},${tmp_seq_line}p ${fasta_file} > ${out_dir}/temp/${snp}.fasta
+}
+
+export -f split_fasta
+
+function run_snpmeta() {
+    local fasta_seq=$1 # For a single SNP
+    local email=$2
+    local out_dir=$3
+    out_filename=$(basename ${fasta_seq} .fasta)
+    SNPMeta.py -f ${fasta_seq} -i -a ${email} --outfmt tabular > ${out_dir}/temp_ann_split/${out_filename}.txt
+}
+
+export -f run_snpmeta
+
+# Split fasta file for parallel processing later on
+for i in ${SNP_ARR[@]}
+do
+    if grep -nq "\<${i}\>" ${FASTA}
+    then
+        split_fasta ${i} ${FASTA} ${OUT_DIR}
+    else
+        echo "${i} not in contextual fasta file"
+    fi
+done
+
+# Generate sample list
+cd ${OUT_DIR}/temp
+find $(pwd -P) -name "*.fasta" | sort -V > ${OUT_DIR}/temp/all_fasta_list.txt
+FASTA_ARR=($(cat ${OUT_DIR}/temp/all_fasta_list.txt))
+
+# Run program in parallel
+parallel run_snpmeta {} ${EMAIL} ${OUT_DIR} ::: ${FASTA_ARR[@]}
