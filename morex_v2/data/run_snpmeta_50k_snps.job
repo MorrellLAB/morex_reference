@@ -7,7 +7,11 @@
 set -e
 set -o pipefail
 
-# This script runs SNPMeta on the 50k snps dataset
+# This script runs SNPMeta on the 50k snps dataset in parallel. SNPMeta can take a long time to run,
+# so this script is designed to check if the output file exists and run SNPMeta if it doesn't exist.
+# This allows us to re-submit the same job without modifications when we run out of walltime. Only
+# the samples that have not completed or have not started running will be processed upon re-submitting
+# this job script.
 
 # Dependencies
 module load python3/3.7.1_anaconda
@@ -72,6 +76,24 @@ done
 cd ${OUT_DIR}/temp
 find $(pwd -P) -name "*.fasta" | sort -V > ${OUT_DIR}/temp/all_fasta_list.txt
 FASTA_ARR=($(cat ${OUT_DIR}/temp/all_fasta_list.txt))
+
+# Add code to check if files exist or if file exists but is empty (0 bytes)
+# If it already exists and is not 0 bytes, remove from FASTA_ARR because it's already done processing
+# Check if directory contains files
+if [ -n "$(ls -A ${OUT_DIR}/temp_ann_split 2>/dev/null)" ]
+then
+    # Contains files
+    cd ${OUT_DIR}/temp_ann_split
+    # Create a list of all files in temp_ann_split
+    find -name "*.txt" | sed -e 's,./,,' -e 's,.txt,,' | sort -V > ${OUT_DIR}/temp_all_ann_files.txt
+    # Create a list of empty files
+    find -empty -name "*.txt" | sed -e 's,./,,' -e 's,.txt,,' | sort -V > ${OUT_DIR}/temp_empty_ann_files_to_rerun.txt
+    # Create a list of appears to be completed ann files
+    # (we will do a final check based on stderr file once all samples appear to be done)
+    grep -vf ${OUT_DIR}/temp_empty_ann_files_to_rerun.txt ${OUT_DIR}/temp_all_ann_files.txt > ${OUT_DIR}/temp_completed_ann_files.txt
+    # Create FASTA_ARR excluding completed samples
+    FASTA_ARR=($(grep -vf ${OUT_DIR}/temp_completed_ann_files.txt ${OUT_DIR}/temp/all_fasta_list.txt))
+fi
 
 # Run program in parallel
 parallel run_snpmeta {} ${EMAIL} ${OUT_DIR} ::: ${FASTA_ARR[@]}
