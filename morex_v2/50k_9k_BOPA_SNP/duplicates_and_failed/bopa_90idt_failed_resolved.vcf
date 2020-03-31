@@ -1,0 +1,14 @@
+#CHROM	POS	ID	REF	ALT	QUAL	FILTER	INFO
+chr2H	48775454	11_10084	-	C	.	.	B;Identities=230/246(93%),failed
+chr1H	10403689	11_10332	G	A	.	.	B;Identities=67/69(97%),failed
+chr6H	551401832	11_20036	A	G	.	.	B;Identities=46/47(98%),failed
+chr5H	584665706	11_21138	A	T	.	.	B;Identities=86/92(93%),failed
+chr1H	361474652	11_21361	C	G	.	.	B;Identities=200/201(99%),failed
+chr4H	501467403	11_21400	C	T	.	.	B;Identities=238/241(99%),failed
+chrUn	72453162	11_21416	G	A	.	.	B;Identities=92/98(94%),failed
+chr3H	599834020	12_11297	G	C	.	.	B;Identities=81/84(96%),failed
+chr2H	102476744	12_20234	C	T	.	.	B;Identities=83/87(95%),failed
+chr4H	609103293	12_30884	A	T	.	.	B;Identities=21/23(91%),failed
+chr4H	420693228	12_30891	T	A	.	.	B;Identities=21/22(95%),failed
+chr1H	389205946	12_30892	T	A	.	.	B;Identities=54/67(81%),failed
+chr1H	8299812	12_30951	-	T	.	.	B;Identities=119/121(98%),failed
