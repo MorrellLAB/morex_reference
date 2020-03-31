@@ -32,7 +32,7 @@ def main(snp_table):
             # Print sequence descriptor line
             print('>' + tmp[0])
             # Print sequence
-            print(tmp[1])
+            print(tmp[1].upper())
 
 
 main(sys.argv[1]) # Run the program
