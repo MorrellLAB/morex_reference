@@ -2,3 +2,4 @@
 *.DS_Store
 *error_files
 settings.json
+*temp_old
