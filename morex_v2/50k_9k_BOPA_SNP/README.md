@@ -141,21 +141,7 @@ OUT_PREFIX=BOPA_morex_v2_idt90
 
 Originally we used a 95 identity threshold but then found that for some overlapping SNPs between the BOPA and 9k sets, the BLAST results did not match and resulted in discordant positions. So, we reduced the identity threshold to 90.
 
-Summarizing SNPs for 95 identity threshold:
-
-```bash
-# Total number of SNPs
-grep -v "#" BOPA_morex_v2_idt95.vcf | cut -f 3 | wc -l
-    2992
-# Total number of unique SNPs
-grep -v "#" BOPA_morex_v2_idt95.vcf | cut -f 3 | sort -u | wc -l
-    2985
-# Total number of duplicates
-grep -v "#" BOPA_morex_v2_idt95.vcf | cut -f 3 | sort | uniq -c | sort -n -r | grep -vw "1" | wc -l
-    5
-```
-
-For 90idt:
+Summarizing SNPs for 90idt:
 
 ```bash
 # Total SNPs
@@ -171,13 +157,13 @@ grep -v "#" BOPA_morex_v2_idt90.vcf | cut -f 3 | sort | uniq -c | sort -n -r | g
 
 After running `snp_utils.py` for 95idt, we get:
 
-- 2,985 SNPs without duplicates
+- 2,985 unique SNPs
 - 5 SNPs with duplicates
 - 52 failed SNPs
 
-For 90idt, we get:
+For **90idt**, we get:
 
-- 3,024 SNPs without duplicates
+- 3,024 unique SNPs
 - 5 SNPs with duplicates
 - 19 failed SNPs
 
@@ -188,40 +174,38 @@ For the ones that failed, we "manually" BLAST using the IPK server: https://webb
 Let's resolve the duplicate SNPs, since there are only 5, we can do this manually.
 
 List of 5 BOPA SNPs with duplicates:
-- 12_31124
-- 12_30822
-- 12_30861
-- 12_21135
-- 11_20074
-
-SNP 12_31124:
 
 ```bash
-# In dir: ~/Shared/References/Reference_Sequences/Barley/Morex_v2
-# Duplicates of this SNP
-grep 12_31124 BOPA_morex_v2_idt95.vcf
-chr1H    37719516    12_31124    C    T    .    .    B
-chrUn    56705296    12_31124    C    T    .    .    B
-chrUn    75911901    12_31124    G    A    .    .    B
-
-# In dir: ~/Shared/Datasets/Genotyping/Contextual_Sequences/BOPA_SNPs
-# Identify line number of duplicate SNP in FASTA file
-grep -n 12_31124 BOPA_SNPs.fasta
-5637:>12_31124
-
-# View contextual sequence associated with that SNP
-sed -n '5637,5638p' BOPA_SNPs.fasta
->12_31124
-CTATTAGAGTCTTGTATATGTATTATATCATAGACAAAGCACACGAAATGATGTCCAGATYATTCTTCTTCTTCATCAGTCCACACGAGAGGTTTAAATTGTATATGTAAATCCAGAATTC
+# In dir: ~/GitHub/morex_reference/morex_v2/50k_9k_BOPA_SNP
+grep -v "#" BOPA_morex_v2_idt90.vcf | cut -f 3 | sort | uniq -c | sort -n -r | grep -vw "1"
+   3 12_31124
+   3 12_30822
+   2 12_30861
+   2 12_21135
+   2 11_20074
 ```
 
-Check if SNP hits a gene by searching in the SNPMeta output file `~/GitHub/morex_reference/morex_v2/data/bopa_and_9k_snpmeta_output.txt`. This step is intended to reduce noise since we expect all the BOPA and 9k SNPs to only be in genic regions. If there is a gene hit, BLAST search the gene with IPK server using default settings. If there is a gene hit, BLAST search the gene with IPK server using default settings. (**Note:** See 9k step 2 section for a more automated way of doing this).
+Make a list of duplicate SNPs:
 
-For SNP 12_31124, there was no BLAST hit according to SNPMeta. In this case, we pick the smaller physical position on chr1H to use in the VCF and write notes in the INFO field of the VCF file for the other duplicates with the following format. Format from previous BOPA SNPs relative to Morex v1: https://github.com/lilei1/9k_BOPA_SNP/blob/617faed6534ddbf94c287636a068ac4c4f5b25c8/BOPA_9k_vcf_Morex_refv1/sorted_all_BOPA_masked_95idt.vcf
+```bash
+# In dir: ~/GitHub/morex_reference/morex_v2/50k_9k_BOPA_SNP
+grep -v "#" BOPA_morex_v2_idt90.vcf | cut -f 3 | sort | uniq -c | sort -n -r | grep -vw "1" | sed -e 's,   ,,' | cut -d' ' -f 2 | sort -V > duplicates_and_failed/bopa_duplicate_snp_names.txt
+# Save duplicates to vcf
+grep -f duplicates_and_failed/bopa_duplicate_snp_names.txt BOPA_morex_v2_idt90.vcf | sort -V -k3,3 > duplicates_and_failed/bopa_duplicates_idt90.vcf
+# Make copy for resolving duplicates
+cp bopa_duplicates_idt90.vcf bopa_duplicates_idt90_resolved.vcf
+```
 
-More generally, IPK blast search the SNP fasta sequences and pick the best hit to resolve duplicate. If there is no gene for a SNP (e.g., BK_02) or the blast search has multiple identical/equally good results, we will choose the smaller (left) position and put notes in the Info field.
+Remove duplicates from VCF temporarily:
 
-But we will list ALTCHR first before ALTPOS since that is the format that was already present in the current VCF file we are working with. Example:
+```bash
+# In dir: ~/GitHub/morex_reference/morex_v2/50k_9k_BOPA_SNP
+grep -vf duplicates_and_failed/bopa_duplicate_snp_names.txt BOPA_morex_v2_idt90.vcf > temp_bopa_idt90_noDups.vcf
+```
+
+Check if SNP hits a gene by searching in the SNPMeta output file `~/GitHub/morex_reference/morex_v2/data/bopa_and_9k_snpmeta_output.txt`. This step is intended to reduce noise since we expect all the BOPA and 9k SNPs to only be in genic regions. If there is a gene hit, BLAST search the gene with IPK server, pick the best hit, and write notes in the INFO field of the VCF. If there is no hit, choose the smallest position (smallest chromosome and smallest physical position) and write notes in the INFO field of the VCF file. For more details, take a look at the file [`Resolve_Duplicate_SNPs_Methods.md`](https://github.com/MorrellLAB/morex_reference/blob/master/morex_v2/50k_9k_BOPA_SNP/Resolve_Duplicate_SNPs_Methods.md).
+
+We will list ALTCHR first before ALTPOS since that is the format that was already present in the current VCF file we are working with. Example:
 > ALTCHR=chr1H;ALTPOS=2525021;B
 
 Example of full line (except in our case we will list ALTCHR first and ALTPOS second:
@@ -232,47 +216,60 @@ If there are more than 2 duplicates, we can format the INFO field as follows:
 
 Now, repeat this process to resolve remaining duplicates.
 
+Resolved duplicates are in the file `bopa_duplicates_idt90_resolved.vcf` and will be combined with the file `temp_bopa_idt90_noDups.vcf` and failed SNPs (see step 3) at the end and sorted.
+
 **Step 3:** Rescue failed SNPs
+
+*File preparation*. Let's create a fasta file containing only the failed SNPs.
+
+```bash
+# In dir: ~/Shared/References/Reference_Sequences/Barley/Morex_v2/bopa_9k_50k/intermediates
+~/GitHub/morex_reference/morex_v2/50k_9k_BOPA_SNP/get_fasta_seq.sh BOPA_morex_v2_idt90_failed.log .log ~/Shared/Datasets/Genotyping/Contextual_Sequences/BOPA_SNPs/BOPA_SNPs.fasta ~/Shared/References/Reference_Sequences/Barley/Morex_v2/bopa_9k_50k/intermediates
+```
 
 Here are the general rules the script uses for picking SNPs when they fail out of SNP_Utils:
 
-First, we will use the `BOPA_morex_v2_idt95_failed.fasta` file containing failed SNPs only and BLAST using the IPK server with the following parameters:
+First, we will use the `BOPA_morex_v2_idt90_failed.fasta` file containing failed SNPs only and BLAST using the [IPK server](https://webblast.ipk-gatersleben.de/barley_ibsc/) with the following parameters:
 - Program: blastn
 - Database(s): Barley Pseudomolecules Morex v2.0 2019
 
 We will do a basic search. This may take a minute or two. Next, we will save the page as an HTML file (we only want the HTML only and NOT the complete webpage), this file will be given as input to the script `parse_ipk_blast_results.py`.
-
-Let's create a fasta file containing only the failed SNPs.
-
-```bash
-# In dir: ~/Shared/References/Reference_Sequences/Barley/Morex_v2
-~/GitHub/morex_reference/morex_v2/50k_9k_BOPA_SNP/get_fasta_seq.sh BOPA_morex_v2_idt95_failed.log .log ~/Shared/Datasets/Genotyping/Contextual_Sequences/BOPA_SNPs/BOPA_SNPs.fasta ~/Shared/References/Reference_Sequences/Barley/Morex_v2
-```
 
 Use script to resolve failed SNPs.
 
 ```bash
 # In dir: ~/GitHub/morex_reference/morex_v2/50k_9k_BOPA_SNP
 ./parse_ipk_blast_results.py \
-    ~/GitHub/morex_reference/morex_v2/50k_9k_BOPA_SNP/duplicates_and_failed/BOPA_morex_v2_idt95_failed.fasta \
-    ~/GitHub/morex_reference/morex_v2/50k_9k_BOPA_SNP/duplicates_and_failed/IPK_BLAST_bopa_95idt_failed.html \
-    ~/GitHub/morex_reference/morex_v2/50k_9k_BOPA_SNP/duplicates_and_failed/bopa_95idt_failed_resolved.vcf
+    ~/GitHub/morex_reference/morex_v2/50k_9k_BOPA_SNP/duplicates_and_failed/BOPA_morex_v2_idt90_failed.fasta \
+    ~/GitHub/morex_reference/morex_v2/50k_9k_BOPA_SNP/duplicates_and_failed/BOPA_morex_v2_idt90_failed.html \
+    ~/GitHub/morex_reference/morex_v2/50k_9k_BOPA_SNP/duplicates_and_failed/bopa_90idt_failed_resolved.vcf
 ```
 
 Manually check resolved SNPs, if reference allele is `-`, this allele needs to be removed since we cannot resolve this.
 
 ```bash
 # In dir: ~/GitHub/morex_reference/morex_v2/50k_9k_BOPA_SNP/duplicates_and_failed
-grep -v "-" bopa_95idt_failed_resolved.vcf > bopa_95idt_failed_resolved_noIns.vcf
+# Rename log file
+mv unresolved_snps.log bopa_90idt_unresolved_snps.log
+# Check resolved snps
+grep -w "-" bopa_90idt_failed_resolved.vcf
+chr2H	48775454	11_10084	-	C	.	.	B;Identities=230/246(93%),failed
+chr1H	8299812	12_30951	-	T	.	.	B;Identities=119/121(98%),failed
+
+# Remove snps where ref is ins
+grep -vw "-" bopa_90idt_failed_resolved.vcf > bopa_90idt_failed_resolved_noIns.vcf
 ```
 
-Append rescued failed SNPs to VCF and sort.
+**Wrapping up and combining files:**
+
+Append resolved duplicate snps and rescued failed SNPs to VCF and sort.
 
 ```bash
 # In dir: /Users/chaochih/GitHub/morex_reference/morex_v2/50k_9k_BOPA_SNP
-tail -n +2 duplicates_and_failed/bopa_95idt_failed_resolved_noIns.vcf >> BOPA_morex_v2_idt95.vcf
-grep "#" BOPA_morex_v2_idt95.vcf > BOPA_morex_v2_idt95_sorted.vcf
-grep -v "#" BOPA_morex_v2_idt95.vcf | sort -V -k1,2 >> BOPA_morex_v2_idt95_sorted.vcf
+tail -n +2 duplicates_and_failed/bopa_90idt_failed_resolved_noIns.vcf | cat - duplicates_and_failed/bopa_duplicates_idt90_resolved.vcf >> temp_bopa_idt90_noDups.vcf
+grep "#" temp_bopa_idt90_noDups.vcf > BOPA_morex_v2_idt90.vcf
+# Sort
+grep -v "#" temp_bopa_idt90_noDups.vcf | sort -V -k1,2 >> BOPA_morex_v2_idt90.vcf
 ```
 
 ---
@@ -593,7 +590,7 @@ After running `snp_utils.py`, we get:
 
 **Step 2:** Resolve duplicate SNPs
 
-For duplicates, the general procedure we will follow is to
+For duplicates, the general procedure we will follow is the same as resolving the 9k duplicate snps (detailed above).
 
 *File preparation:* Pull out only the duplicates to resolve and save to a file.
 
@@ -613,6 +610,8 @@ Convert contextual sequence from [A/B] format to IUPAC codes so we can BLAST sea
 # In dir: ~/GitHub/morex_reference/morex_v2/50k_9k_BOPA_SNP
 ./snp_to_iupac_fasta.py ~/GitHub/morex_reference/lookup_tables/snp_utils_50k_lookup_table_filtered.txt > duplicates_and_failed/for_mackenzie/snp_utils_50k_lookup_table_filtered.fasta
 ```
+
+Use the `morex_reference/morex_v2/data/50k_snpmeta_output.txt` file to reduce noise when resolving duplicate SNPs.
 
 **Step 3:** Rescue failed SNPs
 
