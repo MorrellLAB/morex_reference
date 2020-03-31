@@ -51,13 +51,20 @@ function run_snpmeta() {
 export -f run_snpmeta
 
 # Split fasta file for parallel processing later on
+# Note: This step can take ~45 min if there are > 41,000 files
+# So, we will skip it if the fasta file exists
 for i in ${SNP_ARR[@]}
 do
-    if grep -nq "\<${i}\>" ${FASTA}
+    if ls ${OUT_DIR}/temp/${i}.fasta 1> /dev/null 2>&1
     then
-        split_fasta ${i} ${FASTA} ${OUT_DIR}
+        echo "${i}.fasta file exists"
     else
-        echo "${i} not in contextual fasta file"
+        if grep -nq "\<${i}\>" ${FASTA}
+        then
+            split_fasta ${i} ${FASTA} ${OUT_DIR}
+        else
+            echo "${i} not in contextual fasta file"
+        fi
     fi
 done
 
