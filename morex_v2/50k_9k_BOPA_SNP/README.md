@@ -595,7 +595,7 @@ After running `snp_utils.py`, we get:
 
 For duplicates, the general procedure we will follow is to
 
-File preparation: Pull out only the duplicates to resolve and save to a file.
+*File preparation:* Pull out only the duplicates to resolve and save to a file.
 
 ```bash
 # In dir: ~/GitHub/morex_reference/morex_v2/50k_9k_BOPA_SNP
@@ -618,7 +618,7 @@ Convert contextual sequence from [A/B] format to IUPAC codes so we can BLAST sea
 
 Following the same procedure as the BOPA SNPs, we "manually" blast using the IPK server https://webblast.ipk-gatersleben.de/barley_ibsc/.
 
-First, let's create a fasta file containing only the failed SNPs.
+We already created the fasta file for the 50k SNPs in Step 2.
 
 ```bash
 # In dir: ~/Shared/Datasets/Genotyping/Contextual_Sequences
