@@ -86,8 +86,10 @@ then
     cd ${OUT_DIR}/temp_ann_split
     # Create a list of all files in temp_ann_split
     find -name "*.txt" | sed -e 's,./,,' -e 's,.txt,,' | sort -V > ${OUT_DIR}/temp_all_ann_files.txt
-    # Create a list of empty files
-    find -empty -name "*.txt" | sed -e 's,./,,' -e 's,.txt,,' | sort -V > ${OUT_DIR}/temp_empty_ann_files_to_rerun.txt
+    # Create a list of empty files or files that only have header lines
+    # Files containing only header lines are 232 bytes in size
+    # So, we will check for files smaller than 232 bytes
+    find -type f -size -232c -name "*.txt" | sed -e 's,./,,' -e 's,.txt,,' | sort -V > ${OUT_DIR}/temp_empty_ann_files_to_rerun.txt
     # Create a list of appears to be completed ann files
     # (we will do a final check based on stderr file once all samples appear to be done)
     grep -vf ${OUT_DIR}/temp_empty_ann_files_to_rerun.txt ${OUT_DIR}/temp_all_ann_files.txt > ${OUT_DIR}/temp_completed_ann_files.txt
