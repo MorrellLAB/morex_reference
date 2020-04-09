@@ -429,7 +429,7 @@ On MSI, copy final sorted VCF to `/panfs/roc/groups/9/morrellp/shared/References
 
 ```bash
 # In dir: ~/GitHub/morex_reference/morex_v2/50k_9k_BOPA_SNP
-cp *_sorted.vcf /panfs/roc/groups/9/morrellp/shared/References/Reference_Sequences/Barley/Morex_v2/bopa_9k_50k
+cp 9k_morex_v2_idt90.vcf /panfs/roc/groups/9/morrellp/shared/References/Reference_Sequences/Barley/Morex_v2/bopa_9k_50k
 ```
 
 ---
