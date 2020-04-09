@@ -414,12 +414,13 @@ Append duplicate SNPs and rescued failed SNPs to VCF and sort.
 
 ```bash
 # In dir: ~/GitHub/morex_reference/morex_v2/50k_9k_BOPA_SNP
-cat duplicates_and_failed/9k_duplicates_idt90_resolved.vcf duplicates_and_failed/9k_90idt_failed_resolved_noIns.vcf | grep -v "#" >> 9k_morex_v2_idt90.vcf
-
-# Save header lines
-grep "#" 9k_morex_v2_idt90.vcf > 9k_morex_v2_idt90_sorted.vcf
+tail -n +2 duplicates_and_failed/9k_90idt_failed_resolved_noIns.vcf | cat - duplicates_and_failed/9k_duplicates_idt90_resolved.vcf >> temp_9k_idt90_noDups.vcf
+#cat duplicates_and_failed/9k_duplicates_idt90_resolved.vcf duplicates_and_failed/9k_90idt_failed_resolved_noIns.vcf | grep -v "#" >> 9k_morex_v2_idt90.vcf
+grep "#" temp_9k_idt90_noDups.vcf > 9k_morex_v2_idt90.vcf
 # Sort VCF
-grep -v "#" 9k_morex_v2_idt90.vcf | sort -k1,2 -V >> 9k_morex_v2_idt90_sorted.vcf
+grep -v "#" temp_9k_idt90_noDups.vcf | sort -V -k1,2 >> 9k_morex_v2_idt90.vcf
+# Cleanup
+rm temp_9k_idt90_noDups.vcf
 ```
 
 Cleanup, move intermediate files in `duplicates_and_failed` directory to subdirectory called `intermediates`.
@@ -431,41 +432,13 @@ On MSI, copy final sorted VCF to `/panfs/roc/groups/9/morrellp/shared/References
 cp *_sorted.vcf /panfs/roc/groups/9/morrellp/shared/References/Reference_Sequences/Barley/Morex_v2/bopa_9k_50k
 ```
 
-Check to see if there are any duplicates in the final file
-
-```bash
-# In dir: ~/GitHub/morex_reference/morex_v2/50k_9k_BOPA_SNP
-grep -v "#" 9k_morex_v2_idt90_sorted.vcf | cut -f 3 | sort | uniq -c | sort -n -r | grep -vw "1" | awk '{ print $2 }' > temp_remaining_9k_duplicates.txt
-
-grep -wf temp_remaining_9k_duplicates.txt 9k_morex_v2_idt90_sorted.vcf | sort -Vk3,3 > temp_9k_duplicates_to_fix.vcf
-
-cp temp_9k_duplicates_to_fix.vcf temp_9k_fixed_duplicates.vcf
-```
-
-We will manually fix these in the file `temp_9k_fixed_duplicates.vcf`. Then, we will fix these duplicates in the VCF file.
-
-```bash
-# In dir: ~/GitHub/morex_reference/morex_v2/50k_9k_BOPA_SNP
-# Remove the duplicate SNPs first
-grep -vf temp_9k_duplicates_to_fix.vcf 9k_morex_v2_idt90_sorted.vcf > temp_9k_morex_v2_idt90_sorted.vcf
-# Now, append the fixed duplicate SNPs
-cat temp_9k_fixed_duplicates.vcf >> temp_9k_morex_v2_idt90_sorted.vcf
-# Sort VCF file
-grep "#" temp_9k_morex_v2_idt90_sorted.vcf > 9k_morex_v2_idt90_sorted.vcf
-grep -v "#" temp_9k_morex_v2_idt90_sorted.vcf | sort -Vk1,2 >> 9k_morex_v2_idt90_sorted.vcf
-# Check for duplicates one more time
-grep -v "#" 9k_morex_v2_idt90_sorted.vcf | cut -f 3 | sort | uniq -c | sort -n -r | grep -vw "1"
-# Cleanup
-rm temp_*
-```
-
 ---
 
 ### Check overlapping BOPA and 9k iSelect SNPs
 
-Check for BOPA and 9k position concordance
+Check for BOPA and 9k position concordance.
 
-Make sure all SNP positions for SNPs that overlap in the two sets are concordant.
+**Check 1.** BOPA used 95idt and 9k used 90idt threshold. Make sure all SNP positions for SNPs that overlap in the two sets are concordant.
 
 ```bash
 # In dir: ~/GitHub/morex_reference/morex_v2/50k_9k_BOPA_SNP
@@ -487,6 +460,14 @@ OUT_PREFIX=BOPA_morex_v2_idt90
 # Run SNP Utils BLAST
 ~/software_development/SNP_Utils/snp_utils.py BLAST -l ${LOOKUP_TABLE} -c blast_bopa_morex_v2_idt90 -b -m ${GENETIC_MAP} -d -t 100000 -o ${OUT_PREFIX}
 ```
+
+**Check2.** BOPA used 90idt and 9k used 90idt threshold.
+
+```bash
+./check_position_concordance.py BOPA_morex_v2_idt90.vcf 9k_morex_v2_idt90.vcf
+```
+
+Everything looks ok now.
 
 ---
 
