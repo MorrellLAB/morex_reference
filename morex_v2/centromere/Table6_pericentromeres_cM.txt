@@ -1,0 +1,7 @@
+chr1H "NA" "NA" pericentromere
+chr2H 67.1 68.1 pericentromere
+chr3H 65.3 67.9 pericentromere
+chr4H 56.2 56.2 pericentromere
+chr5H 42.4 42.4 pericentromere
+chr6H 59.3 60.6 pericentromere
+chr7H 80.3 81.8 pericentromere
