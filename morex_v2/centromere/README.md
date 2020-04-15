@@ -17,3 +17,15 @@ We will run the script `get_centromere_positions.R` that was modified from Ana P
 
 1. Pericentromere physical positions (`pericentromere_physPos.txt`)
 2. VCF file with SNPs that are in the pericentromeric region (`9k_snps_pericentromere.vcf`).
+
+Pericentromere positions are also listed in the table below:
+
+| Chr | Start | End |
+| --- | ----- | --- |
+| chr1H | NA | NA |
+| chr2H | 203689667 | 365198431 |
+| chr3H | 98960757 | 401158614 |
+| chr4H | 54094751 | 507869478 |
+| chr5H | 53760064 | 332514770 |
+| chr6H | 349655750 | 351670614 |
+| chr7H | 199910025 | 436392291 |
