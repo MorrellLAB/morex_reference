@@ -108,3 +108,27 @@ write.table(vcf_pcent_ordered,
             row.names=F,
             col.names=F,
             sep="\t")
+
+#----------------------
+
+# Extra: Explore differences between Morex_v1 and Morex_v2 pericentromere positions
+# Morex v2
+morex_v2 <- vcf_pcent_ordered %>%
+    group_by(CHROM) %>%
+    summarise(min_pos = min(POS),
+              max_pos = max(POS),
+              pcent_size = max_pos - min_pos)
+morex_v2 <- rbind(tibble(CHROM = "chr1H", min_pos = "NA", max_pos = "NA", pcent_size = "NA"), morex_v2)
+morex_v2
+
+# Morex v1
+morex_v1 <- tibble(CHROM = final_table$CHROM, 
+                       min_pos = c("NA", 136904248, 115794456, 58804724, 60207685, 180782470, 202235859),
+                       max_pos = c("NA", 528069469, 438235281, 467767377, 368181264, 383275592, 449173785)) %>%
+    mutate(pcent_size = as.numeric(max_pos) - as.numeric(min_pos))
+
+morex_v1
+
+# Compare
+cbind(morex_v2, morex_v1)
+morex_v2$pcent_size > morex_v1$pcent_size
