@@ -31,3 +31,5 @@ Pericentromere positions are also listed in the table below:
 | chr7H | 199910025 | 436392291 |
 
 We are not able to figure out positions for chr1H. Previously, for Morex v1 Tom found the pericentromere positions (including chr1H) by using Supplemental Table 4.4 from [Mascher et al 2017 Nature](https://www.nature.com/articles/nature22043).
+
+As a check, I compared the inferred positions above to Fig S2 in [Monat et al 2019 Genome Biology](https://doi.org/10.1186/s13059-019-1899-5). All chromosomes have pericentromere positions within the same ballpark as shown in Fig S2, except for chr6H. Based on the figure chr6H should be around 80 to 450 Mb. My inference for chr6H was around 349 to 351 Mb. The positions for chr6H will be taken as tentative positions for now.
