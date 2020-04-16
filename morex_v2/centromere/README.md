@@ -29,3 +29,5 @@ Pericentromere positions are also listed in the table below:
 | chr5H | 53760064 | 332514770 |
 | chr6H | 349655750 | 351670614 |
 | chr7H | 199910025 | 436392291 |
+
+We are not able to figure out positions for chr1H. Previously, for Morex v1 Tom found the pericentromere positions (including chr1H) by using Supplemental Table 4.4 from [Mascher et al 2017 Nature](https://www.nature.com/articles/nature22043).
