@@ -3,3 +3,4 @@
 *error_files
 settings.json
 *temp_old
+*.Rhistory
