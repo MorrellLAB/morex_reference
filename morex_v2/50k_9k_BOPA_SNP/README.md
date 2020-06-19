@@ -274,11 +274,20 @@ grep "#" temp_bopa_idt90_noDups.vcf > BOPA_morex_v2_idt90.vcf
 grep -v "#" temp_bopa_idt90_noDups.vcf | sort -V -k1,2 >> BOPA_morex_v2_idt90.vcf
 ```
 
-Copy final BOPA positions file to Shared space on MSI:
+Convert pseudomolecular positions to parts positions:
 
 ```bash
 # In dir: ~/GitHub/morex_reference/morex_v2/50k_9k_BOPA_SNP
-cp BOPA_morex_v2_idt90.vcf ~/Shared/References/Reference_Sequences/Barley/Morex_v2/bopa_9k_50k
+module load python2/2.7.12_anaconda4.2
+~/GitHub/File_Conversions/Pseudomolecules_to_Parts_v2.py --vcf BOPA_morex_v2_idt90.vcf > BOPA_morex_v2_idt90_parts.vcf
+```
+
+Make a symbolic link in Shared space on MSI:
+
+```bash
+cd ~/Shared/References/Reference_Sequences/Barley/Morex_v2/bopa_9k_50
+ln -s /panfs/roc/groups/9/morrellp/liux1299/GitHub/morex_reference/morex_v2/50k_9k_BOPA_SNP/BOPA_morex_v2_idt90.vcf
+ln -s /panfs/roc/groups/9/morrellp/liux1299/GitHub/morex_reference/morex_v2/50k_9k_BOPA_SNP/BOPA_morex_v2_idt90_parts.vcf
 ```
 
 ---
@@ -425,11 +434,20 @@ rm temp_9k_idt90_noDups.vcf
 
 Cleanup, move intermediate files in `duplicates_and_failed` directory to subdirectory called `intermediates`.
 
-On MSI, copy final sorted VCF to `/panfs/roc/groups/9/morrellp/shared/References/Reference_Sequences/Barley/Morex_v2/bopa_9k_50k`.
+Convert pseudomolecular positions to parts positions:
 
 ```bash
 # In dir: ~/GitHub/morex_reference/morex_v2/50k_9k_BOPA_SNP
-cp 9k_morex_v2_idt90.vcf /panfs/roc/groups/9/morrellp/shared/References/Reference_Sequences/Barley/Morex_v2/bopa_9k_50k
+module load python2/2.7.12_anaconda4.2
+~/GitHub/File_Conversions/Pseudomolecules_to_Parts_v2.py --vcf 9k_morex_v2_idt90.vcf > 9k_morex_v2_idt90_parts.vcf
+```
+
+Make a symbolic link in Shared space on MSI:
+
+```bash
+cd ~/Shared/References/Reference_Sequences/Barley/Morex_v2/bopa_9k_50
+ln -s /panfs/roc/groups/9/morrellp/liux1299/GitHub/morex_reference/morex_v2/50k_9k_BOPA_SNP/9k_morex_v2_idt90.vcf
+ln -s /panfs/roc/groups/9/morrellp/liux1299/GitHub/morex_reference/morex_v2/50k_9k_BOPA_SNP/9k_morex_v2_idt90_parts.vcf
 ```
 
 ---
@@ -629,9 +647,16 @@ Use script to resolve failed SNPs.
 
 ```bash
 # In dir: ~/GitHub/morex_reference/morex_v2/50k_9k_BOPA_SNP
-./parse_ipk_blast_results.py \
-    ~/GitHub/morex_reference/morex_v2/50k_9k_BOPA_SNP/duplicates_and_failed/9k_morex_v2_idt90_failed.fasta \
-    ~/GitHub/morex_reference/morex_v2/50k_9k_BOPA_SNP/duplicates_and_failed/IPK_BLAST_9k_90idt_failed.html \
-    ~/GitHub/morex_reference/morex_v2/50k_9k_BOPA_SNP/duplicates_and_failed/9k_90idt_failed_resolved.vcf
+# ./parse_ipk_blast_results.py \
+#     ~/GitHub/morex_reference/morex_v2/50k_9k_BOPA_SNP/duplicates_and_failed/9k_morex_v2_idt90_failed.fasta \
+#     ~/GitHub/morex_reference/morex_v2/50k_9k_BOPA_SNP/duplicates_and_failed/IPK_BLAST_9k_90idt_failed.html \
+#     ~/GitHub/morex_reference/morex_v2/50k_9k_BOPA_SNP/duplicates_and_failed/9k_90idt_failed_resolved.vcf
 ```
 
+Convert pseudomolecular positions to parts positions:
+
+```bash
+# In dir: ~/GitHub/morex_reference/morex_v2/50k_9k_BOPA_SNP
+module load python2/2.7.12_anaconda4.2
+~/GitHub/File_Conversions/Pseudomolecules_to_Parts_v2.py --vcf 50k_morex_v2_idt90.vcf > 50k_morex_v2_idt90_parts.vcf
+```
