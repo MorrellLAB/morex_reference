@@ -5,6 +5,7 @@
 ##INFO=<ID=ALTCHR,Number=.,Type=String,Description="Alternate chromosomal positions">
 ##INFO=<ID=ALTPOS,Number=.,Type=Integer,Description="Alternate positions">
 ##INFO=<ID=B,Number=0,Type=Flag,Description="Variant Calculated from BLAST">
+##INFO=<ID=Identities,Number=.,Type=String,Description="Percent identity in BLAST search for SNPs that fail out ouf SNP_Utils">
 #CHROM	POS	ID	REF	ALT	QUAL	FILTER	INFO
 chr1H	142369	SCRI_RS_169369	T	C	.	.	B
 chr1H	146218	SCRI_RS_149838	G	A	.	.	B
