@@ -1,10 +1,18 @@
 ##fileformat=VCFv4.2
-##fileDate=20200319
-##source=snp_utils.py
-##reference=Barley_Morex_V2_pseudomolecules.fasta
 ##INFO=<ID=ALTCHR,Number=.,Type=String,Description="Alternate chromosomal positions">
 ##INFO=<ID=ALTPOS,Number=.,Type=Integer,Description="Alternate positions">
 ##INFO=<ID=B,Number=0,Type=Flag,Description="Variant Calculated from BLAST">
+##contig=<ID=chr1H,length=522466905>
+##contig=<ID=chr2H,length=675310294>
+##contig=<ID=chr3H,length=628753756>
+##contig=<ID=chr4H,length=624247919>
+##contig=<ID=chr5H,length=599018945>
+##contig=<ID=chr6H,length=573247234>
+##contig=<ID=chr7H,length=634667502>
+##contig=<ID=chrUn,length=85026395>
+##fileDate=20200319
+##reference=Barley_Morex_V2_pseudomolecules.fasta
+##source=snp_utils.py
 #CHROM	POS	ID	REF	ALT	QUAL	FILTER	INFO
 chr1H	142369	SCRI_RS_169369	T	C	.	.	B
 chr1H	145558	JHI-Hv50k-2016-358	G	C	.	.	B
