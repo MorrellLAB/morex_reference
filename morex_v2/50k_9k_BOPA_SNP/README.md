@@ -290,6 +290,32 @@ ln -s /panfs/roc/groups/9/morrellp/liux1299/GitHub/morex_reference/morex_v2/50k_
 ln -s /panfs/roc/groups/9/morrellp/liux1299/GitHub/morex_reference/morex_v2/50k_9k_BOPA_SNP/BOPA_morex_v2_idt90_parts.vcf
 ```
 
+Fix VCF header line by adding contig lengths to vcf header:
+
+```bash
+# In dir: ~/GitHub/morex_reference/morex_v2/50k_9k_BOPA_SNP
+# Run on MSI, relies on Picard Jar file
+# Parts positions
+~/GitHub/morex_reference/morex_v2/50k_9k_BOPA_SNP/add_contig_length_to_header.sh \
+  ~/GitHub/morex_reference/morex_v2/50k_9k_BOPA_SNP/BOPA_morex_v2_idt90_parts.vcf \
+  ~/Shared/References/Reference_Sequences/Barley/Morex_v2/Barley_Morex_V2_pseudomolecules_parts.dict
+
+# Cleanup the filename
+mv BOPA_morex_v2_idt90_parts_fixedHeader.vcf BOPA_morex_v2_idt90_parts.vcf
+# Index vcf file
+module load gatk/4.1.2
+gatk IndexFeatureFile -F BOPA_morex_v2_idt90_parts.vcf
+
+# Pseudomolecular positions
+~/GitHub/morex_reference/morex_v2/50k_9k_BOPA_SNP/add_contig_length_to_header.sh \
+  ~/GitHub/morex_reference/morex_v2/50k_9k_BOPA_SNP/BOPA_morex_v2_idt90.vcf \
+  ~/Shared/References/Reference_Sequences/Barley/Morex_v2/Barley_Morex_V2_pseudomolecules.dict
+
+# Cleanup the filename
+mv BOPA_morex_v2_idt90_fixedHeader.vcf BOPA_morex_v2_idt90.vcf
+gatk IndexFeatureFile -F BOPA_morex_v2_idt90.vcf
+```
+
 ---
 
 ### Methods: 9k iSelect
@@ -448,6 +474,32 @@ Make a symbolic link in Shared space on MSI:
 cd ~/Shared/References/Reference_Sequences/Barley/Morex_v2/bopa_9k_50
 ln -s /panfs/roc/groups/9/morrellp/liux1299/GitHub/morex_reference/morex_v2/50k_9k_BOPA_SNP/9k_morex_v2_idt90.vcf
 ln -s /panfs/roc/groups/9/morrellp/liux1299/GitHub/morex_reference/morex_v2/50k_9k_BOPA_SNP/9k_morex_v2_idt90_parts.vcf
+```
+
+Fix VCF header line by adding contig lengths to vcf header:
+
+```bash
+# In dir: ~/GitHub/morex_reference/morex_v2/50k_9k_BOPA_SNP
+# Run on MSI, relies on Picard Jar file
+# Parts positions
+~/GitHub/morex_reference/morex_v2/50k_9k_BOPA_SNP/add_contig_length_to_header.sh \
+  ~/GitHub/morex_reference/morex_v2/50k_9k_BOPA_SNP/9k_morex_v2_idt90_parts.vcf \
+  ~/Shared/References/Reference_Sequences/Barley/Morex_v2/Barley_Morex_V2_pseudomolecules_parts.dict
+
+# Cleanup the filename
+mv 9k_morex_v2_idt90_parts_fixedHeader.vcf 9k_morex_v2_idt90_parts.vcf
+# Index vcf file
+module load gatk/4.1.2
+gatk IndexFeatureFile -F 9k_morex_v2_idt90_parts.vcf
+
+# Pseudomolecular positions
+~/GitHub/morex_reference/morex_v2/50k_9k_BOPA_SNP/add_contig_length_to_header.sh \
+  ~/GitHub/morex_reference/morex_v2/50k_9k_BOPA_SNP/9k_morex_v2_idt90.vcf \
+  ~/Shared/References/Reference_Sequences/Barley/Morex_v2/Barley_Morex_V2_pseudomolecules.dict
+
+# Cleanup the filename
+mv 9k_morex_v2_idt90_fixedHeader.vcf 9k_morex_v2_idt90.vcf
+gatk IndexFeatureFile -F 9k_morex_v2_idt90.vcf
 ```
 
 ---
@@ -659,4 +711,30 @@ Convert pseudomolecular positions to parts positions:
 # In dir: ~/GitHub/morex_reference/morex_v2/50k_9k_BOPA_SNP
 module load python2/2.7.12_anaconda4.2
 ~/GitHub/File_Conversions/Pseudomolecules_to_Parts_v2.py --vcf 50k_morex_v2_idt90.vcf > 50k_morex_v2_idt90_parts.vcf
+```
+
+Fix VCF header line by adding contig lengths to vcf header:
+
+```bash
+# In dir: ~/GitHub/morex_reference/morex_v2/50k_9k_BOPA_SNP
+# Run on MSI, relies on Picard Jar file
+# Parts positions
+~/GitHub/morex_reference/morex_v2/50k_9k_BOPA_SNP/add_contig_length_to_header.sh \
+  ~/GitHub/morex_reference/morex_v2/50k_9k_BOPA_SNP/50k_morex_v2_idt90_parts.vcf \
+  ~/Shared/References/Reference_Sequences/Barley/Morex_v2/Barley_Morex_V2_pseudomolecules_parts.dict
+
+# Cleanup the filename
+mv 50k_morex_v2_idt90_parts_fixedHeader.vcf 50k_morex_v2_idt90_parts.vcf
+# Index vcf file
+module load gatk/4.1.2
+gatk IndexFeatureFile -F 50k_morex_v2_idt90_parts.vcf
+
+# Pseudomolecular positions
+~/GitHub/morex_reference/morex_v2/50k_9k_BOPA_SNP/add_contig_length_to_header.sh \
+  ~/GitHub/morex_reference/morex_v2/50k_9k_BOPA_SNP/50k_morex_v2_idt90.vcf \
+  ~/Shared/References/Reference_Sequences/Barley/Morex_v2/Barley_Morex_V2_pseudomolecules.dict
+
+# Cleanup the filename
+mv 50k_morex_v2_idt90_fixedHeader.vcf 50k_morex_v2_idt90.vcf
+gatk IndexFeatureFile -F 50k_morex_v2_idt90.vcf
 ```
