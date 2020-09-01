@@ -409,15 +409,23 @@ def main(FASTA, BLAST_RESULTS_HTML, OUT_FILE):
         # Save current snp name
         csnp_name = elem[0].split()[1]
         print(csnp_name)
-        # Probably need to store the output from pick_best_hist somehow
-        cbhs = pick_best_hit(current_snp=elem, context_snp_seq=fasta_win_dict[csnp_name][1])
-        if "NoHit" in cbhs:
+        # "No hits found" issue during IPK BLAST search
+        if "No hits found" in elem[5]:
+            print("No hits found in IPK BLAST search for SNP: " + csnp_name)
             # Save SNP to log file
             with open(os.path.expanduser(log_filename), 'a') as f:
-                f.write(cbhs + "\n")
+                f.write(csnp_name + " - No hits found in IPK BLAST search" + "\n")
         else:
-            # Add new dictionary key,value pair
-            bhs[csnp_name] = cbhs
+            # Probably need to store the output from pick_best_hist somehow
+            cbhs = pick_best_hit(current_snp=elem, context_snp_seq=fasta_win_dict[csnp_name][1])
+            # "NoHit" from not being able to resolve SNP, but there was an IPK BLAST search result
+            if "NoHit" in cbhs:
+                # Save SNP to log file
+                with open(os.path.expanduser(log_filename), 'a') as f:
+                    f.write(cbhs + "\n")
+            else:
+                # Add new dictionary key,value pair
+                bhs[csnp_name] = cbhs
     # Start from clean file, check if file exists
     if os.path.exists(os.path.expanduser(OUT_FILE)):
         os.remove(os.path.expanduser(OUT_FILE))
