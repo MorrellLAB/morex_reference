@@ -4,3 +4,5 @@
 settings.json
 *temp_old
 *.Rhistory
+# Ignore testing/debugging related directory
+*testing_related
