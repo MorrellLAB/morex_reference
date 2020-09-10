@@ -102,7 +102,7 @@ def context_snp_win(fasta_dict, snp_name):
             print("No SNP left of midpoint")
             # Since we only have a SNP right of the midpoint, use that as SNP
             context_snpidx = rsnp_idx
-            context_seq = ''.join(fasta_dict[snp_name][context_snpidx-3: context_snpidx+4])
+            context_seq = [''.join(fasta_dict[snp_name][context_snpidx-3:context_snpidx]), fasta_dict[snp_name][context_snpidx], ''.join(fasta_dict[snp_name][context_snpidx+1:context_snpidx+4])]
         else:
             try:
                 rsnp_idx
@@ -110,15 +110,15 @@ def context_snp_win(fasta_dict, snp_name):
                 print("No SNP right of midpoint")
                 # Since we only have a SNP left of the midpoint, use that as SNP
                 context_snpidx = lsnp_idx
-                context_seq = ''.join(fasta_dict[snp_name][context_snpidx-3: context_snpidx+4])
+                context_seq = [''.join(fasta_dict[snp_name][context_snpidx-3:context_snpidx]), fasta_dict[snp_name][context_snpidx], ''.join(fasta_dict[snp_name][context_snpidx+1:context_snpidx+4])]
             else:
                 cand_snp_idx = [lsnp_idx, rsnp_idx]
                 context_snpidx = closest(cand_snp_idx, mid_context_snpidx)
-                context_seq = ''.join(fasta_dict[snp_name][context_snpidx-3: context_snpidx+4])
+                context_seq = [''.join(fasta_dict[snp_name][context_snpidx-3:context_snpidx]), fasta_dict[snp_name][context_snpidx], ''.join(fasta_dict[snp_name][context_snpidx+1:context_snpidx+4])]
     else:
         # Center position is the SNP
         context_snpidx = mid_context_snpidx
-        context_seq = ''.join(fasta_dict[snp_name][context_snpidx-3: context_snpidx+4])
+        context_seq = [''.join(fasta_dict[snp_name][context_snpidx-3:context_snpidx]), fasta_dict[snp_name][context_snpidx], ''.join(fasta_dict[snp_name][context_snpidx+1:context_snpidx+4])]
     return (context_snpidx, context_seq)
 
 
@@ -201,8 +201,10 @@ def pick_best_hit(current_snp, context_snp_seq):
         # If elem is not the last index
         if elem != score_idx[-1]:
             tmp_query_seq = cat_query_seq(snp_hit_split[0][score_idx[i]:score_idx[i+1]])
-            log.append(context_snp_seq in tmp_query_seq.upper())
-            if context_snp_seq in tmp_query_seq.upper():
+            log.append(''.join(context_snp_seq) in tmp_query_seq.upper())
+            # Exit out of loop as soon as we find first query seq that contains the context seq
+            # again, the BLAST results are sorted from best hit to worst hit so this works
+            if ''.join(context_snp_seq) in tmp_query_seq.upper():
                 score_start_idx = score_idx[i]
                 score_end_idx = score_idx[i+1]
                 break
@@ -210,8 +212,10 @@ def pick_best_hit(current_snp, context_snp_seq):
             # We are at the last element or have only one hit
             # for this chromosome. Go until the end
             tmp_query_seq = cat_query_seq(snp_hit_split[0][score_idx[i]:])
-            log.append(context_snp_seq in tmp_query_seq.upper())
-            if context_snp_seq in tmp_query_seq.upper():
+            log.append(''.join(context_snp_seq) in tmp_query_seq.upper())
+            # Exit out of loop as soon as we find first query seq that contains the context seq
+            # again, the BLAST results are sorted from best hit to worst hit so this works
+            if ''.join(context_snp_seq) in tmp_query_seq.upper():
                 score_start_idx = score_idx[i]
                 score_end_idx = len(snp_hit_split[0]) - 1
                 break
@@ -322,13 +326,16 @@ def extract_info(snp_name, current_best_hit, fasta_dict):
     sbjct_seq = "".join(sbjct_seq_list).upper()
     # Keep starting position of subject (ref)
     sbjct_start_pos = ",".join(current_best_hit[sbjct_idx[0]].split()).split(',')[1]
+    # Identify the contextual sequence surrounding SNP
+    # Example format is: ['TAT', 'Y', 'GTG']
+    # where middle element in list is the SNP
+    context_seq = fasta_dict[snp_name][1]
     # Find the physical position of the SNP in the reference
     # This assumes Plus/Plus strand
-    context_seq = fasta_dict[snp_name][1]
     if strand == "Plus/Plus":
-        if query_seq.find(context_seq) != -1:
-            # Return the leftmost index of the context_seq + floor(len(context_seq)/2)
-            qsnp_idx = query_seq.find(context_seq) + math.floor(len(context_seq)/2)
+        if query_seq.find(''.join(context_seq)) != -1:
+            # Return the leftmost index of the context_seq + context_seq left of SNP
+            qsnp_idx = query_seq.find(''.join(context_seq)) + len(context_seq[0])
             query_snp = query_seq[qsnp_idx]
             # Now, we have the index for the SNP
             # Let's get the associated position in the reference (Sbjct)
@@ -348,9 +355,9 @@ def extract_info(snp_name, current_best_hit, fasta_dict):
             # Add code here to save SNP to log file
     elif strand == "Plus/Minus":
         # print("coordinates are reversed")
-        if query_seq.find(context_seq) != -1:
-            # Return the leftmost index of the context_seq + floor(len(context_seq)/2)
-            qsnp_idx = query_seq.find(context_seq) + math.floor(len(context_seq)/2)
+        if query_seq.find(''.join(context_seq)) != -1:
+            # Return the leftmost index of the context_seq + context_seq left of SNP
+            qsnp_idx = query_seq.find(''.join(context_seq)) + len(context_seq[0])
             query_snp = query_seq[qsnp_idx]
             # Now, we have the index for the SNP
             # Let's get the associated position in the reference (Sbjct)
@@ -391,7 +398,7 @@ def main(FASTA, BLAST_RESULTS_HTML, OUT_FILE):
     for i in range(0, len(start_idx)):
         tmp = content[start_idx[i]:end_idx[i]+1]
         l.append(tmp)
-    # Generate 7bp windows of contextual fasta containing the SNP
+    # Generate 7bp windows of contextual sequence containing the SNP
     fasta_win_dict = {}
     for i, elem in enumerate(fasta_dict.keys()):
         tmp_context_snpidx, tmp_context_seq = context_snp_win(fasta_dict, elem)
@@ -420,6 +427,7 @@ def main(FASTA, BLAST_RESULTS_HTML, OUT_FILE):
             cbhs = pick_best_hit(current_snp=elem, context_snp_seq=fasta_win_dict[csnp_name][1])
             # "NoHit" from not being able to resolve SNP, but there was an IPK BLAST search result
             if "NoHit" in cbhs:
+                print("NoHit")
                 # Save SNP to log file
                 with open(os.path.expanduser(log_filename), 'a') as f:
                     f.write(cbhs + "\n")
