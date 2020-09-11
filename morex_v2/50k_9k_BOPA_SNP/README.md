@@ -246,7 +246,7 @@ Use script to resolve failed SNPs.
     ~/GitHub/morex_reference/morex_v2/50k_9k_BOPA_SNP/duplicates_and_failed/bopa_90idt_failed_resolved.vcf
 ```
 
-Manually check resolved SNPs, if reference allele is `-`, this allele needs to be removed since we cannot resolve this.
+Manually check resolved SNPs, if reference allele is `-`, this SNP needs to be removed since we cannot resolve this due to a deletion in the reference.
 
 ```bash
 # In dir: ~/GitHub/morex_reference/morex_v2/50k_9k_BOPA_SNP/duplicates_and_failed
@@ -259,7 +259,7 @@ chr2H	48775454	11_10084	-	C	.	.	B;Identities=230/246(93%),failed
 chr1H	8299812	12_30951	-	T	.	.	B;Identities=119/121(98%),failed
 
 # Remove snps where ref is ins
-grep -vw "-" bopa_90idt_failed_resolved.vcf > bopa_90idt_failed_resolved_noIns.vcf
+grep -vw "-" bopa_90idt_failed_resolved.vcf > bopa_90idt_failed_resolved_noRefDel.vcf
 ```
 
 **Wrapping up and combining files:**
@@ -268,7 +268,7 @@ Append resolved duplicate snps and rescued failed SNPs to VCF and sort.
 
 ```bash
 # In dir: /Users/chaochih/GitHub/morex_reference/morex_v2/50k_9k_BOPA_SNP
-tail -n +2 duplicates_and_failed/bopa_90idt_failed_resolved_noIns.vcf | cat - duplicates_and_failed/bopa_duplicates_idt90_resolved.vcf >> temp_bopa_idt90_noDups.vcf
+tail -n +2 duplicates_and_failed/bopa_90idt_failed_resolved_noRefDel.vcf | cat - duplicates_and_failed/bopa_duplicates_idt90_resolved.vcf >> temp_bopa_idt90_noDups.vcf
 grep "#" temp_bopa_idt90_noDups.vcf > BOPA_morex_v2_idt90.vcf
 # Sort
 grep -v "#" temp_bopa_idt90_noDups.vcf | sort -V -k1,2 >> BOPA_morex_v2_idt90.vcf
@@ -423,7 +423,7 @@ Use script to resolve failed SNPs.
     ~/GitHub/morex_reference/morex_v2/50k_9k_BOPA_SNP/duplicates_and_failed/9k_90idt_failed_resolved.vcf
 ```
 
-Manually check resolved SNPs, if reference allele is `-`, this allele needs to be removed since we cannot resolve this.
+Manually check resolved SNPs, if reference allele is `-`, this SNP needs to be removed since we cannot resolve this due to a deletion in the reference.
 
 ```bash
 # In dir: ~/GitHub/morex_reference/morex_v2/50k_9k_BOPA_SNP/duplicates_and_failed
@@ -440,7 +440,7 @@ chr1H	391116331	SCRI_RS_213457	-	A	.	.	B;Identities=61/68(90%),failed
 chr4H	1359302	SCRI_RS_235733	-	G	.	.	B;Identities=100/130(77%),failed
 
 # Remove SNPs where ref is ins
-grep -v "-" 9k_90idt_failed_resolved.vcf > 9k_90idt_failed_resolved_noIns.vcf
+grep -v "-" 9k_90idt_failed_resolved.vcf > 9k_90idt_failed_resolved_noRefDel.vcf
 ```
 
 **Wrapping up and combining files:**
@@ -449,8 +449,8 @@ Append duplicate SNPs and rescued failed SNPs to VCF and sort.
 
 ```bash
 # In dir: ~/GitHub/morex_reference/morex_v2/50k_9k_BOPA_SNP
-tail -n +2 duplicates_and_failed/9k_90idt_failed_resolved_noIns.vcf | cat - duplicates_and_failed/9k_duplicates_idt90_resolved.vcf >> temp_9k_idt90_noDups.vcf
-#cat duplicates_and_failed/9k_duplicates_idt90_resolved.vcf duplicates_and_failed/9k_90idt_failed_resolved_noIns.vcf | grep -v "#" >> 9k_morex_v2_idt90.vcf
+tail -n +2 duplicates_and_failed/9k_90idt_failed_resolved_noRefDel.vcf | cat - duplicates_and_failed/9k_duplicates_idt90_resolved.vcf >> temp_9k_idt90_noDups.vcf
+#cat duplicates_and_failed/9k_duplicates_idt90_resolved.vcf duplicates_and_failed/9k_90idt_failed_resolved_noRefDel.vcf | grep -v "#" >> 9k_morex_v2_idt90.vcf
 grep "#" temp_9k_idt90_noDups.vcf > 9k_morex_v2_idt90.vcf
 # Sort VCF
 grep -v "#" temp_9k_idt90_noDups.vcf | sort -V -k1,2 >> 9k_morex_v2_idt90.vcf
@@ -671,38 +671,114 @@ Convert contextual sequence from [A/B] format to IUPAC codes so we can BLAST sea
 
 Use the `morex_reference/morex_v2/data/50k_snpmeta_output.txt` file to reduce noise when resolving duplicate SNPs.
 
+Mackenzie Linane helped resolve duplicate SNPs for the 50k set. The detailed steps and resolved SNPs are in a subdirectory:
+- Steps documentation: https://github.com/MorrellLAB/morex_reference/tree/master/morex_v2/50k_9k_BOPA_SNP/duplicates_and_failed/for_mackenzie
+- Resolved duplicate VCF file: `morex_reference/morex_v2/50k_9k_BOPA_SNP/duplicates_and_failed/for_mackenzie/50k_duplicates_resolved.vcf`
+
 **Step 3:** Rescue failed SNPs
 
 Following the same procedure as the BOPA SNPs, we "manually" blast using the IPK server https://webblast.ipk-gatersleben.de/barley_ibsc/.
 
-We already created the fasta file for the 50k SNPs in Step 2.
+*File preparation.* Let's create a fasta file containing only the 50k failed SNPs. But, we need to convert the 50k `[A/B]` formatted SNPs to IUPAC nucleotide base code. The IPK Barley BLAST search does not accept sequences with snps formatted as `[A/B]`.
 
 ```bash
-# In dir: ~/Shared/Datasets/Genotyping/Contextual_Sequences
-# First, create fasta file containing all BOPA and 9k SCRI SNPs
-cp BOPA_SNPs/BOPA_SNPs.fasta BOPA_and_9k_SCRI_SNPs.fasta
-cat 9k_snp_SCRI/SCRI_SNPs.fasta >> BOPA_and_9k_SCRI_SNPs.fasta
+# In dir: ~/Shared/Datasets/Genotyping/Contextual_Sequences/barley_50k
+module load python3/3.6.3_anaconda5.0.1
+~/GitHub/morex_reference/morex_v2/50k_9k_BOPA_SNP/snp_to_iupac_fasta.py ~/Shared/Datasets/Genotyping/Contextual_Sequences/barley_50k/snp_utils_50k_lookup_table_filtered.txt > 50k_snps_iupac.fasta
 
+# In dir: ~/Shared/References/Reference_Sequences/Barley/Morex_v2/bopa_9k_50k/intermediates
 # Then, extract only the failed SNPs
 ~/GitHub/morex_reference/morex_v2/50k_9k_BOPA_SNP/get_fasta_seq.sh \
-    9k_morex_v2_idt90_failed.log \
+    50k_morex_v2_idt90_failed.log \
     .log \
-    ~/Shared/Datasets/Genotyping/Contextual_Sequences/BOPA_and_9k_SCRI_SNPs.fasta \
+    ~/Shared/Datasets/Genotyping/Contextual_Sequences/barley_50k/50k_snps_iupac.fasta \
     ~/Shared/References/Reference_Sequences/Barley/Morex_v2/bopa_9k_50k/intermediates
 ```
 
-Then, we will use the `9k_morex_v2_idt90_failed.fasta` file containing failed SNPs only and BLAST using the IPK server with the following parameters:
+Then, we will use the `50k_morex_v2_idt90_failed.fasta` file containing failed SNPs only and BLAST using the IPK server with the following parameters:
 - Program: blastn
 - Database(s): Barley Pseudomolecules Morex v2.0 2019
+
+We will do a basic search. This may take a minute or two. Next, we will save the page as an HTML file (we only want the HTML only and NOT the complete webpage), this file will be given as input to the script `parse_ipk_blast_results.py`.
 
 Use script to resolve failed SNPs.
 
 ```bash
 # In dir: ~/GitHub/morex_reference/morex_v2/50k_9k_BOPA_SNP
-# ./parse_ipk_blast_results.py \
-#     ~/GitHub/morex_reference/morex_v2/50k_9k_BOPA_SNP/duplicates_and_failed/9k_morex_v2_idt90_failed.fasta \
-#     ~/GitHub/morex_reference/morex_v2/50k_9k_BOPA_SNP/duplicates_and_failed/IPK_BLAST_9k_90idt_failed.html \
-#     ~/GitHub/morex_reference/morex_v2/50k_9k_BOPA_SNP/duplicates_and_failed/9k_90idt_failed_resolved.vcf
+./parse_ipk_blast_results.py \
+    ~/GitHub/morex_reference/morex_v2/50k_9k_BOPA_SNP/duplicates_and_failed/intermediates/50k_morex_v2_idt90_failed.fasta \
+    ~/GitHub/morex_reference/morex_v2/50k_9k_BOPA_SNP/duplicates_and_failed/intermediates/IPK_BLAST_50k_idt90_failed.html \
+    ~/GitHub/morex_reference/morex_v2/50k_9k_BOPA_SNP/duplicates_and_failed/intermediates/50k_idt90_failed_resolved.vcf
+
+# Rename log file
+mv unresolved_snps.log 50k_idt90_unresolved_snps.log
+```
+
+Manually check resolved SNPs, if reference allele is `-`, this SNP needs to be removed since we cannot resolve this due to a deletion in the reference.
+
+```bash
+# In dir: ~/GitHub/morex_reference/morex_v2/50k_9k_BOPA_SNP/duplicates_and_failed
+# Check resolved snps
+# Here are ones we could not resolve
+grep -w "-" 50k_idt90_failed_resolved.vcf 
+chr2H	25095696	SCRI_RS_143250	-	G	.	.	B;Identities=118/121(98%),failed
+chr6H	398167515	SCRI_RS_158011	-	T	.	.	B;Identities=119/121(98%),failed
+chr2H	18961510	SCRI_RS_185319	-	G	.	.	B;Identities=118/121(98%),failed
+chr7H	12800051	SCRI_RS_196319	-	G	.	.	B;Identities=117/121(97%),failed
+chr4H	1359302	SCRI_RS_235733	-	G	.	.	B;Identities=100/130(77%),failed
+
+# Remove SNPs where ref is ins
+grep -vw "-" 50k_idt90_failed_resolved.vcf > ../50k_idt90_failed_resolved_noRefDel.vcf
+```
+
+**Checks**
+
+Did a few checks and found we somehow missed resolving a few of the duplicate SNPs.
+
+```bash
+# Make a list of SNPs we missed in round1 of resolving duplicates
+~/GitHub/morex_reference/morex_v2/50k_9k_BOPA_SNP/duplicates_and_failed $ diff -y 50k_duplicate_snp_names.txt temp_dup_resolved_snp_names.txt | grep "<" | cut -f 1 | sort -V > 50k_duplicate_snp_names_missed_round1.txt
+# Pull out duplicates we missed
+grep -wf 50k_duplicate_snp_names_missed_round1.txt ../50k_morex_v2_idt90.vcf | sort -k3,3 -k1,1 > for_mackenzie/50k_duplicates_resolved_missed_round1.vcf
+# Add these to the duplicates vcf for future reference
+grep -wf 50k_duplicate_snp_names_missed_round1.txt ../50k_morex_v2_idt90.vcf | sort -k3,3 -k1,1 >> 50k_duplicates_only.vcf
+```
+
+Follow above steps for resolving these duplicates.
+
+**Wrapping up and combining files:**
+
+Append duplicate SNPs and rescued failed SNPs to VCF and sort.
+
+```bash
+# In dir: ~/GitHub/morex_reference/morex_v2/50k_9k_BOPA_SNP
+tail -n +2 duplicates_and_failed/50k_idt90_failed_resolved_noRefDel.vcf | cat - duplicates_and_failed/for_mackenzie/50k_duplicates_resolved.vcf duplicates_and_failed/for_mackenzie/50k_duplicates_resolved_missed_round1.vcf > temp_50k_idt90_dups_and_failed_resolved.vcf
+# Remove duplicates from original VCF
+grep -wvf duplicates_and_failed/50k_duplicate_snp_names.txt 50k_morex_v2_idt90.vcf > temp_50k_idt90_noDups.vcf
+grep -wvf duplicates_and_failed/50k_duplicate_snp_names_missed_round1.txt temp_50k_idt90_noDups.vcf > temp_50k_idt90_noDups_clean.vcf
+# Combine all files
+cat temp_50k_idt90_noDups_clean.vcf temp_50k_idt90_dups_and_failed_resolved.vcf > 50k_morex_v2_idt90_unsorted.vcf
+
+# Fix headers
+module load gatk/4.1.2
+gatk FixVcfHeader --INPUT 50k_morex_v2_idt90_unsorted.vcf --OUTPUT 50k_morex_v2_idt90_unsorted_fixedHeader.vcf
+# Make sure contig lengths are accurate
+gatk UpdateVcfSequenceDictionary --INPUT 50k_morex_v2_idt90_unsorted_fixedHeader.vcf --OUTPUT 50k_morex_v2_idt90_unsorted_fixedHeader_lengths.vcf --SEQUENCE_DICTIONARY /panfs/roc/groups/9/morrellp/shared/References/Reference_Sequences/Barley/Morex_v2/Barley_Morex_V2_pseudomolecules.dict
+# Sort VCF
+gatk SortVcf -I 50k_morex_v2_idt90_unsorted_fixedHeader_lengths.vcf -O 50k_morex_v2_idt90_sorted.vcf
+# Rename file
+git rm 50k_morex_v2_idt90.vcf
+mv 50k_morex_v2_idt90_sorted.vcf 50k_morex_v2_idt90.vcf
+# Index VCF
+gatk IndexFeatureFile --input 50k_morex_v2_idt90.vcf
+```
+
+Cleanup intermediate files:
+
+```bash
+# In dir: ~/GitHub/morex_reference/morex_v2/50k_9k_BOPA_SNP
+rm temp_50k*
+rm 50k_morex_v2_idt90_unsorted*
 ```
 
 Convert pseudomolecular positions to parts positions:
@@ -710,31 +786,8 @@ Convert pseudomolecular positions to parts positions:
 ```bash
 # In dir: ~/GitHub/morex_reference/morex_v2/50k_9k_BOPA_SNP
 module load python2/2.7.12_anaconda4.2
+module load gatk_ML/4.1.8
 ~/GitHub/File_Conversions/Pseudomolecules_to_Parts_v2.py --vcf 50k_morex_v2_idt90.vcf > 50k_morex_v2_idt90_parts.vcf
-```
-
-Fix VCF header line by adding contig lengths to vcf header:
-
-```bash
-# In dir: ~/GitHub/morex_reference/morex_v2/50k_9k_BOPA_SNP
-# Run on MSI, relies on Picard Jar file
-# Parts positions
-~/GitHub/morex_reference/morex_v2/50k_9k_BOPA_SNP/add_contig_length_to_header.sh \
-  ~/GitHub/morex_reference/morex_v2/50k_9k_BOPA_SNP/50k_morex_v2_idt90_parts.vcf \
-  ~/Shared/References/Reference_Sequences/Barley/Morex_v2/Barley_Morex_V2_pseudomolecules_parts.dict
-
-# Cleanup the filename
-mv 50k_morex_v2_idt90_parts_fixedHeader.vcf 50k_morex_v2_idt90_parts.vcf
-# Index vcf file
-module load gatk/4.1.2
-gatk IndexFeatureFile -F 50k_morex_v2_idt90_parts.vcf
-
-# Pseudomolecular positions
-~/GitHub/morex_reference/morex_v2/50k_9k_BOPA_SNP/add_contig_length_to_header.sh \
-  ~/GitHub/morex_reference/morex_v2/50k_9k_BOPA_SNP/50k_morex_v2_idt90.vcf \
-  ~/Shared/References/Reference_Sequences/Barley/Morex_v2/Barley_Morex_V2_pseudomolecules.dict
-
-# Cleanup the filename
-mv 50k_morex_v2_idt90_fixedHeader.vcf 50k_morex_v2_idt90.vcf
-gatk IndexFeatureFile -F 50k_morex_v2_idt90.vcf
+# Index parts vcf
+gatk IndexFeatureFile --input 50k_morex_v2_idt90_parts.vcf
 ```
