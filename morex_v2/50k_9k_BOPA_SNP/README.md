@@ -609,9 +609,11 @@ For now, I will save the problem SNPs and come back to resolve them later on.
 ```bash
 # In dir: ~/Shared/Datasets/Genotyping/Contextual_Sequences/barley_50k
 # Save SNP name
-grep JHI-Hv50k-2016-132670 snp_utils_50k_lookup_table.txt | cut -f 1 > snp_utils_50k_lookup_table-problem_snps.txt
-grep JHI-Hv50k-2016-210233 snp_utils_50k_lookup_table.txt | cut -f 1 >> snp_utils_50k_lookup_table-problem_snps.txt
-grep JHI-Hv50k-2016-451305 snp_utils_50k_lookup_table.txt | cut -f 1 >> snp_utils_50k_lookup_table-problem_snps.txt
+grep JHI-Hv50k-2016-132670 snp_utils_50k_lookup_table.txt | cut -f 1 > snp_utils_50k_lookup_table-problem_snp_names.txt
+grep JHI-Hv50k-2016-210233 snp_utils_50k_lookup_table.txt | cut -f 1 >> snp_utils_50k_lookup_table-problem_snp_names.txt
+grep JHI-Hv50k-2016-451305 snp_utils_50k_lookup_table.txt | cut -f 1 >> snp_utils_50k_lookup_table-problem_snp_names.txt
+# Save the SNP Name and sequence into file
+grep -f snp_utils_50k_lookup_table-problem_snp_names.txt snp_utils_50k_lookup_table.txt > snp_utils_50k_lookup_table-problem_snps.txt
 # Remove problem SNP from lookup table
 grep -vf snp_utils_50k_lookup_table-problem_snps.txt snp_utils_50k_lookup_table.txt > snp_utils_50k_lookup_table_filtered.txt
 
@@ -746,6 +748,26 @@ grep -wf 50k_duplicate_snp_names_missed_round1.txt ../50k_morex_v2_idt90.vcf | s
 
 Follow above steps for resolving these duplicates.
 
+**Fixing 3 problem SNPs that returned an error from SNP_Utils.**
+
+The problem SNPs are as follows:
+
+```bash
+JHI-Hv50k-2016-132670   AGRAATGTATATAGACATATTTTAGAGTATAGATTCACTGATTTTACTYYGTATGTAGTC[T/C]CTTAGTGAAATCTCTAAAATGACTTATATTTAGGAGGAAGTATTTTGGGATGCATNAAAA
+JHI-Hv50k-2016-210233   AATTTTGTACTAGAACTAGTACAAAGTTRAGACAGTTATTTTGGGACAGAGGGRGTATAA[A/G]ATTGGCGAATGAGGACTTGGAATTGGGACTGGAACGGTTGGTTACCTAGAGCAAMAKGAT
+JHI-Hv50k-2016-451305   TGTTKGGGAACATAATAGATTATAAAAACTGGATTATATARTCYRGGTGRTTCCAAACAG[A/G]GCCTAGGTAAACATATGTGTGATGCCAATCCATTTGGTTGTTGAGTTGTTTGTCATTTTG
+```
+
+We will manually use IPK barley BLAST for these and run the results through the `parse_ipk_blast_results.py` script.
+
+```bash
+# In dir: ~/GitHub/morex_reference/morex_v2/50k_9k_BOPA_SNP/scripts
+./parse_ipk_blast_results.py \
+    ~/GitHub/morex_reference/morex_v2/50k_9k_BOPA_SNP/problem_snps/snp_utils_50k_lookup_table-problem_snps_AB.fasta \
+    ~/GitHub/morex_reference/morex_v2/50k_9k_BOPA_SNP/problem_snps/IPK_Barley_BLAST_3_problem_snps.html \
+    ~/GitHub/morex_reference/morex_v2/50k_9k_BOPA_SNP/problem_snps/50k_problem_snps_resolved.vcf
+```
+
 **Wrapping up and combining files:**
 
 Append duplicate SNPs and rescued failed SNPs to VCF and sort.
@@ -779,6 +801,21 @@ Cleanup intermediate files:
 # In dir: ~/GitHub/morex_reference/morex_v2/50k_9k_BOPA_SNP
 rm temp_50k*
 rm 50k_morex_v2_idt90_unsorted*
+```
+
+Add in resolved snp utils problem snps:
+
+```bash
+# In dir: ~/Dropbox/GitHub/morex_reference/morex_v2/50k_9k_BOPA_SNP
+cp 50k_morex_v2_idt90.vcf 50k_morex_v2_idt90_unsorted.vcf
+tail -n +2 snp_utils_problem_snps/50k_problem_snps_resolved.vcf >> 50k_morex_v2_idt90_unsorted.vcf
+# Sort VCF
+module load gatk/4.1.2
+gatk SortVcf -I 50k_morex_v2_idt90_unsorted.vcf -O 50k_morex_v2_idt90_sorted.vcf
+# Rename file
+mv 50k_morex_v2_idt90_sorted.vcf 50k_morex_v2_idt90.vcf
+# Index VCF
+gatk IndexFeatureFile --input 50k_morex_v2_idt90.vcf
 ```
 
 Convert pseudomolecular positions to parts positions:

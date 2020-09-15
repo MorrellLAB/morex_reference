@@ -1,0 +1,4 @@
+#CHROM	POS	ID	REF	ALT	QUAL	FILTER	INFO
+chr2H	648958440	JHI-Hv50k-2016-132670	C	T	.	.	B;Identities=116/121(96%),snp_utils_error_snps
+chr3H	590501218	JHI-Hv50k-2016-210233	C	T	.	.	B;Identities=116/121(96%),snp_utils_error_snps
+chr7H	15701681	JHI-Hv50k-2016-451305	A	G	.	.	B;Identities=115/121(95%),snp_utils_error_snps
