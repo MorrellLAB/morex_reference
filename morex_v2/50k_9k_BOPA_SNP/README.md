@@ -316,6 +316,57 @@ mv BOPA_morex_v2_idt90_fixedHeader.vcf BOPA_morex_v2_idt90.vcf
 gatk IndexFeatureFile -F BOPA_morex_v2_idt90.vcf
 ```
 
+**Troubleshooting SNPs that got left out:**
+
+The following SNPs did not get processed by SNP_Utils for some reason (i.e., these SNPs are not in the VCF file output, duplicates, or failed SNPs log file). So, we will get their positions the same way we resolve the failed SNPs.
+- 11_10460
+- 12_10571
+
+The FASTA sequences are as follows:
+
+```bash
+>11_10460
+TGTGCAAGTACAAATACCATTTGTTCATCCATCTATTTTGCAGCAGCTAAACCCATGCAAGGTATTCCTCCAGCARCAGTGCAGCCCTGTGGCAATGTCACAACGTATTGCAAGGTCGCARATGTTGCAACAGAGCAGTTGCCATGTGTTGCAGCAACARTGTTGCCAACAACTGCCGCAAATCCCCGAACAACTCCGCCATGAGGCAGTCCGTGCAATCGTCTACTCTATCGTCCTGCAA
+>12_10571
+TGGCTGGTGCGGCCAAYGGTGAGAATGGAGAAGGGCCTGGAGCCGCCTGATTTTGACGAGRGCAATTCATATGATTTTCCGTTGTATGCGGTTCACATATCKAATTATCTATGCATTGTTA
+```
+
+Now, we will do an IPK Barley BLAST search and use script to resolve these failed SNPs.
+
+```bash
+# In dir: ~/GitHub/morex_reference/morex_v2/50k_9k_BOPA_SNP/scripts
+./parse_ipk_blast_results.py \
+    ~/GitHub/morex_reference/morex_v2/50k_9k_BOPA_SNP/snp_utils_problem_snps/BOPA_snp_utils_problem_snps.fasta \
+    ~/GitHub/morex_reference/morex_v2/50k_9k_BOPA_SNP/snp_utils_problem_snps/IPK_Barley_BLAST_2_BOPA_failed_snpUtils.html \
+    ~/GitHub/morex_reference/morex_v2/50k_9k_BOPA_SNP/snp_utils_problem_snps/BOPA_morex_v2_idt90_snpUtils_problem_snps_resolved.vcf
+```
+
+Add the resolved problem SNPs to main vcf file.
+
+```bash
+# In dir: ~/GitHub/morex_reference/morex_v2/50k_9k_BOPA_SNP/snp_utils_problem_snps
+grep -v "#" BOPA_morex_v2_idt90_snpUtils_problem_snps_resolved.vcf >> ../BOPA_morex_v2_idt90.vcf
+```
+
+Re-sort VCF file and convert to parts positions too.
+
+```bash
+# In dir: ~/GitHub/morex_reference/morex_v2/50k_9k_BOPA_SNP
+gatk SortVcf -I BOPA_morex_v2_idt90.vcf -O BOPA_morex_v2_idt90_sorted.vcf
+# Rename file
+mv BOPA_morex_v2_idt90_sorted.vcf BOPA_morex_v2_idt90.vcf
+# Index file
+gatk IndexFeatureFile --input BOPA_morex_v2_idt90.vcf
+
+# Convert pseudomolecular positions to parts positions
+# In dir: ~/GitHub/morex_reference/morex_v2/50k_9k_BOPA_SNP
+module load python2/2.7.12_anaconda4.2
+module load gatk_ML/4.1.8
+~/GitHub/File_Conversions/Pseudomolecules_to_Parts_v2.py --vcf BOPA_morex_v2_idt90.vcf > BOPA_morex_v2_idt90_parts.vcf
+# Index parts vcf
+gatk IndexFeatureFile --input BOPA_morex_v2_idt90_parts.vcf
+```
+
 ---
 
 ### Methods: 9k iSelect

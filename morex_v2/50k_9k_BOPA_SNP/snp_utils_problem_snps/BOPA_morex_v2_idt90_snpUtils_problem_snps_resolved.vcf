@@ -1,0 +1,3 @@
+#CHROM	POS	ID	REF	ALT	QUAL	FILTER	INFO
+chr1H	2552626	11_10460	T	C	.	.	B;Identities=238/241(99%),failed
+chr3H	11606483	12_10571	T	C	.	.	B;Identities=118/121(98%),failed

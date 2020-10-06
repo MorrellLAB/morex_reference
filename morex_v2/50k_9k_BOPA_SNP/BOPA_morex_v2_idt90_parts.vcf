@@ -3,20 +3,13 @@
 ##INFO=<ID=ALTPOS,Number=.,Type=Integer,Description="Alternate positions">
 ##INFO=<ID=B,Number=0,Type=Flag,Description="Variant Calculated from BLAST">
 ##INFO=<ID=Identities,Number=.,Type=String,Description="Percent identity in BLAST search for SNPs that fail out ouf SNP_Utils">
-##contig=<ID=chr1H_part1,length=205502676>
-##contig=<ID=chr1H_part2,length=316964229>
-##contig=<ID=chr2H_part1,length=305853815>
-##contig=<ID=chr2H_part2,length=369456479>
-##contig=<ID=chr3H_part1,length=271947776>
-##contig=<ID=chr3H_part2,length=356805980>
-##contig=<ID=chr4H_part1,length=282386439>
-##contig=<ID=chr4H_part2,length=341861480>
-##contig=<ID=chr5H_part1,length=205989812>
-##contig=<ID=chr5H_part2,length=393029133>
-##contig=<ID=chr6H_part1,length=260041240>
-##contig=<ID=chr6H_part2,length=313205994>
-##contig=<ID=chr7H_part1,length=328847863>
-##contig=<ID=chr7H_part2,length=305819639>
+##contig=<ID=chr1H,length=522466905>
+##contig=<ID=chr2H,length=675310294>
+##contig=<ID=chr3H,length=628753756>
+##contig=<ID=chr4H,length=624247919>
+##contig=<ID=chr5H,length=599018945>
+##contig=<ID=chr6H,length=573247234>
+##contig=<ID=chr7H,length=634667502>
 ##contig=<ID=chrUn,length=85026395>
 ##fileDate=20200331
 ##reference=Barley_Morex_V2_pseudomolecules.fasta
@@ -40,6 +33,7 @@ chr1H_part1	2050667	12_30916	C	T	.	.	B
 chr1H_part1	2050798	12_30917	C	T	.	.	B
 chr1H_part1	2050881	11_21067	A	G	.	.	B
 chr1H_part1	2417136	11_11223	A	G	.	.	B
+chr1H_part1	2552626	11_10460	T	C	.	.	B;Identities=238/241(99%),failed
 chr1H_part1	2581192	12_11311	C	T	.	.	B
 chr1H_part1	3805296	12_30933	T	C	.	.	B
 chr1H_part1	3805566	12_11011	T	C	.	.	B
@@ -905,6 +899,7 @@ chr3H_part1	8834629	11_10886	G	A	.	.	B
 chr3H_part1	9029969	11_10112	G	C	.	.	B
 chr3H_part1	9669539	11_20595	C	A	.	.	B
 chr3H_part1	9700542	12_30915	G	A	.	.	B
+chr3H_part1	11606483	12_10571	T	C	.	.	B;Identities=118/121(98%),failed
 chr3H_part1	12069739	12_30113	T	C	.	.	B
 chr3H_part1	12215981	11_20172	T	G	.	.	B
 chr3H_part1	12466077	12_10792	T	C	.	.	B
