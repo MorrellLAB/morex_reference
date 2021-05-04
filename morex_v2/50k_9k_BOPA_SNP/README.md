@@ -89,6 +89,7 @@ tar -xzvf taxdb.tar.gz
 
 ```bash
 # In dir: ~/Shared/References/Reference_Sequences/Barley/Morex_v2
+# Using ncbi-blast-2.9.0+
 makeblastdb -in Barley_Morex_V2_pseudomolecules.fasta -dbtype nucl -parse_seqids
 # Check integrity of blast database
 blastdbcheck -db Barley_Morex_V2_pseudomolecules.fasta
