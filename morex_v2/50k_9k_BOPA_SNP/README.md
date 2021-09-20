@@ -6,6 +6,7 @@ This directory contains the scripts used to re-map the BOPA, 9k iSelect, and 50k
 
 - [Data](#data)
 - [Data exploration](#data-exploration)
+- [Data Preparation](#data-preparation)
 - [Methods: BOPA](#methods-bopa)
 - [Methods: 9k iSelect](#methods-9k-iselect)
 - [Check overlapping BOPA and 9k iSelect SNPs](#check-overlapping-bopa-and-9k-iselect-snps)
