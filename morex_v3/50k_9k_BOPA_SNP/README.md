@@ -7,6 +7,8 @@ This directory contains the scripts used to re-map the BOPA, 9k iSelect, and 50k
 - [Data](#data)
 - [Data Preparation](#data-preparation)
 - [Methods: BOPA](#methods-bopa)
+- [Methods: 9K](#methods-9k)
+- [Methods: 50K](#methods-50k)
 
 ---
 
@@ -239,3 +241,163 @@ Navigate to "Blast barley genomes" > "NBCI BLAST+ blastp". Then select the follo
 
 Resolved duplicates are in the file `bopa_duplicates_idt90_resolved.vcf` and will be combined with the file `temp_bopa_idt90_noDups.vcf` and failed SNPs (see step 3) later on and sorted.
 
+---
+
+### Methods: 9K
+
+Steps to identify the physical positions of the 9K SNPs relative to the Morex v3 reference genome. We follow the same steps as the BOPA SNPs, so we won't duplicate detailed documentation that is present there.
+
+**Step 1:** Run SNP_Utils (https://github.com/mojaveazure/SNP_Utils)
+
+```bash
+# In dir: ~/Shared/References/Reference_Sequences/Barley/Morex_v3/bopa_9k_50k
+# Dependencies
+module load python3/3.6.3_anaconda5.0.1
+
+# Define shared variables for files
+LOOKUP_TABLE="/panfs/roc/groups/9/morrellp/liux1299/GitHub/morex_reference/lookup_tables/9k_lookup.txt"
+GENETIC_MAP="/panfs/roc/groups/9/morrellp/liux1299/GitHub/morex_reference/genetic_maps/BOPA/2013_iSelect_Genetic_Map.txt"
+
+# Define variable specific to idt95
+OUT_PREFIX="9k_morex_v3_idt95"
+
+# Run SNP_Utils for idt95
+~/software_development/SNP_Utils/snp_utils.py CONFIG -d ../Barley_MorexV3_pseudomolecules.fasta -k -i 95 -c blast_${OUT_PREFIX}
+
+# Run SNP Utils BLAST for idt95
+~/software_development/SNP_Utils/snp_utils.py BLAST -l ${LOOKUP_TABLE} -c blast_${OUT_PREFIX} -b -m ${GENETIC_MAP} -d -t 100000 -o ${OUT_PREFIX}
+# Relevant part of output messages
+Using genetic map /panfs/roc/groups/9/morrellp/liux1299/GitHub/morex_reference/genetic_maps/BOPA/2013_iSelect_Genetic_Map.txt
+Filtering SNPs with a minimum distance threshold of 100000
+Filtering SNPs by relative location on the genetic map
+Using genetic map /panfs/roc/groups/9/morrellp/liux1299/GitHub/morex_reference/genetic_maps/BOPA/2013_iSelect_Genetic_Map.txt
+Parsing blast database ../Barley_MorexV3_pseudomolecules.fasta
+Found 8 chromosomes
+Filtering 2978 SNP IDs
+No genetic map for chromosome chr7H
+No genetic map for chromosome chr5H
+No genetic map for chromosome chr2H
+Writing 2981 SNPs to 9k_morex_v3_idt95.vcf
+Removing masked SNPs that were actually found
+Writing 2 masked SNPs to 9k_morex_v3_idt95_masked.vcf
+Writing 52 failed SNPs to 9k_morex_v3_idt95_failed.log
+```
+
+Summarizing SNPs for **idt95**:
+
+```bash
+# Total SNPs
+grep -v "#" 9k_morex_v3_idt95.vcf | cut -f 3 | wc -l
+    7674
+# Total unique SNPs
+grep -v "#" 9k_morex_v3_idt95.vcf | cut -f 3 | sort -u | wc -l
+    7594
+# Total number of duplicates
+grep -v "#" 9k_morex_v3_idt95.vcf | cut -f 3 | sort | uniq -c | sort -n -r | grep -vw "1" | wc -l
+    53
+```
+
+After running `snp_utils.py`, we get:
+7,594 SNPs without duplicates
+53 SNPs with duplicates
+205 failed SNPs
+
+**Step 2:** Resolve duplicate SNPs
+
+Make a list of duplicate SNPs and remove duplicates from main VCFs:
+
+```bash
+# In dir: ~/Shared/References/Reference_Sequences/Barley/Morex_v3/bopa_9k_50k
+# idt95
+~/GitHub/morex_reference/morex_v3/50k_9k_BOPA_SNP/remove_duplicates_from_vcf.sh 9k_morex_v3_idt95.vcf 9k_idt95 ~/Shared/References/Reference_Sequences/Barley/Morex_v3/bopa_9k_50k
+
+# Check counts
+grep -v "#" 9k_idt95_noRescuedSNPs.vcf | wc -l
+    7541
+```
+
+---
+
+### Check overlapping BOPA and 9k iSelect SNPs
+
+Check for BOPA and 9k position concordance. For now, we'll check the `*_noRescuedSNPs_partsRef.vcf` VCF files so we can move forward with some analyses. Later on, one duplicates have been resolved and failed SNPs have been rescued, we'll re-run this process on those SNPs.
+
+**Check 1.** BOPA and 9k used 95idt threshold. Make sure all SNP positions for SNPs that overlap in the two sets are concordant.
+
+```bash
+# In dir: ~/Shared/References/Reference_Sequences/Barley/Morex_v3/bopa_9k_50k
+module load python3/3.8.3_anaconda2020.07_mamba(default)
+
+~/GitHub/morex_reference/morex_v2/50k_9k_BOPA_SNP/scripts/check_position_concordance.py bopa_idt95_noRescuedSNPs_partsRef.vcf 9k_idt95_noRescuedSNPs_partsRef.vcf > temp_discordant_bopa_9k_snps.txt
+```
+
+There are no discordant SNP positions.
+
+Add chromosome lengths to header lines so that the VCF works with GATK's Variant Recalibrator.
+
+```bash
+# In dir: ~/Shared/References/Reference_Sequences/Barley/Morex_v3/bopa_9k_50k
+# 9K
+~/GitHub/morex_reference/morex_v2/50k_9k_BOPA_SNP/scripts/add_contig_length_to_header.sh 9k_idt95_noRescuedSNPs_partsRef.vcf ~/Shared/References/Reference_Sequences/Barley/Morex_v3/Barley_MorexV3_pseudomolecules_parts.dict
+
+# 50K
+~/GitHub/morex_reference/morex_v2/50k_9k_BOPA_SNP/scripts/add_contig_length_to_header.sh 50k_idt95_noRescuedSNPs_partsRef.vcf ~/Shared/References/Reference_Sequences/Barley/Morex_v3/Barley_MorexV3_pseudomolecules_parts.dict
+```
+
+---
+
+### Methods: 50K
+
+**Step 1:** Run SNP_Utils (https://github.com/mojaveazure/SNP_Utils)
+
+```bash
+# In dir: ~/Shared/References/Reference_Sequences/Barley/Morex_v3/bopa_9k_50k
+# Dependencies
+module load python3/3.6.3_anaconda5.0.1
+
+# Define shared variables for files
+LOOKUP_TABLE="/panfs/roc/groups/9/morrellp/shared/Datasets/Genotyping/Contextual_Sequences/barley_50k/snp_utils_50k_lookup_table.txt"
+GENETIC_MAP="/panfs/roc/groups/9/morrellp/liux1299/GitHub/morex_reference/genetic_maps/50k_iSelect_Genetic_Map.txt"
+
+# Define variable specific to idt95
+OUT_PREFIX="50k_morex_v3_idt95"
+
+# Run SNP_Utils for idt95
+~/software_development/SNP_Utils/snp_utils.py CONFIG -d ../Barley_MorexV3_pseudomolecules.fasta -k -i 95 -c blast_${OUT_PREFIX}
+
+# Run SNP Utils BLAST for idt95
+~/software_development/SNP_Utils/snp_utils.py BLAST -l ${LOOKUP_TABLE} -c blast_${OUT_PREFIX} -b -m ${GENETIC_MAP} -d -t 100000 -o ${OUT_PREFIX}
+```
+
+Summarizing SNPs:
+
+```bash
+# Total number of SNPs
+grep -v "#" 50k_morex_v3_idt95.vcf | cut -f 3 | wc -l
+    44333
+# Total number of unique SNPs
+grep -v "#" 50k_morex_v3_idt95.vcf | cut -f 3 | sort -u | wc -l
+    43488
+# Total number of duplicates
+grep -v "#" 50k_morex_v3_idt95.vcf | cut -f 3 | sort | uniq -c | sort -n -r | grep -vw "1" | wc -l
+    602
+```
+
+After running `snp_utils.py`, we get:
+43,488 Total SNPs (unique)
+602 SNPs with duplicates
+548 failed SNPs
+
+**Step 2:** Resolve duplicate SNPs
+
+Make a list of duplicate SNPs and remove duplicates from main VCFs:
+
+```bash
+# In dir: ~/Shared/References/Reference_Sequences/Barley/Morex_v3/bopa_9k_50k
+# idt95
+~/GitHub/morex_reference/morex_v3/50k_9k_BOPA_SNP/remove_duplicates_from_vcf.sh 50k_morex_v3_idt95.vcf 50k_idt95 ~/Shared/References/Reference_Sequences/Barley/Morex_v3/bopa_9k_50k
+
+# Check counts
+grep -v "#" 50k_idt95_noRescuedSNPs.vcf | wc -l
+    41813
+```
