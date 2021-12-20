@@ -83,23 +83,45 @@ bash run_snp_utils-bopa_idt90.sh
 bash run_snp_utils-bopa_idt95.sh
 ```
 
-Summarizing SNPs for **idt95**:
+Summarizing SNPs:
 
 ```bash
 # In dir: ~/Shared/References/Reference_Sequences/Barley/Morex_v3/bopa_9k_50k
-# idt95
+# BOPA idt95
 ~/GitHub/morex_reference/morex_v3/50k_9k_BOPA_SNP/scripts/summarize_snp_count.sh bopa_morex_v3_idt95.vcf bopa_morex_v3_idt95_failed.log 
 Total SNPs: 2981
 Total unique SNPs: 2978
 Total duplicate SNPs: 3
 Total failed SNPs: 52
 
-# idt90
+# BOPA idt90
 ~/GitHub/morex_reference/morex_v3/50k_9k_BOPA_SNP/scripts/summarize_snp_count.sh bopa_morex_v3_idt90.vcf bopa_morex_v3_idt90_failed.log
 Total SNPs: 3014
 Total unique SNPs: 3010
 Total duplicate SNPs: 4
 Total failed SNPs: 19
+```
+
+Add chromosome lengths to header lines so that the VCF works with GATK's Variant Recalibrator.
+
+```bash
+# In dir: ~/Shared/References/Reference_Sequences/Barley/Morex_v3/bopa_9k_50k
+# BOPA parts ref
+~/GitHub/morex_reference/morex_v2/50k_9k_BOPA_SNP/scripts/add_contig_length_to_header.sh bopa_idt95_noRescuedSNPs_partsRef.vcf ~/Shared/References/Reference_Sequences/Barley/Morex_v3/Barley_MorexV3_pseudomolecules_parts.dict
+~/GitHub/morex_reference/morex_v2/50k_9k_BOPA_SNP/scripts/add_contig_length_to_header.sh bopa_idt90_noRescuedSNPs_partsRef.vcf ~/Shared/References/Reference_Sequences/Barley/Morex_v3/Barley_MorexV3_pseudomolecules_parts.dict
+# BOPA pseudomolecules ref
+~/GitHub/morex_reference/morex_v2/50k_9k_BOPA_SNP/scripts/add_contig_length_to_header.sh bopa_idt95_noRescuedSNPs.vcf ~/Shared/References/Reference_Sequences/Barley/Morex_v3/Barley_MorexV3_pseudomolecules.dict
+~/GitHub/morex_reference/morex_v2/50k_9k_BOPA_SNP/scripts/add_contig_length_to_header.sh bopa_idt90_noRescuedSNPs.vcf ~/Shared/References/Reference_Sequences/Barley/Morex_v3/Barley_MorexV3_pseudomolecules.dict
+```
+
+Rename files so output name is clean:
+
+```bash
+mv bopa_idt90_noRescuedSNPs_fixedHeader.vcf bopa_idt90_noRescuedSNPs.vcf
+mv bopa_idt90_noRescuedSNPs_partsRef_fixedHeader.vcf bopa_idt90_noRescuedSNPs_partsRef.vcf
+
+mv bopa_idt95_noRescuedSNPs_fixedHeader.vcf bopa_idt95_noRescuedSNPs.vcf
+mv bopa_idt95_noRescuedSNPs_partsRef_fixedHeader.vcf bopa_idt95_noRescuedSNPs_partsRef.vcf
 ```
 
 ---
@@ -118,27 +140,44 @@ bash run_snp_utils-9K_idt95.sh
 bash run_snp_utils-9K_idt90.sh
 ```
 
-Summarizing SNPs for **idt95**:
+Summarizing SNPs:
 
 ```bash
-# Total SNPs
-grep -v "#" 9k_morex_v3_idt95.vcf | cut -f 3 | wc -l
-    7674
-# Total unique SNPs
-grep -v "#" 9k_morex_v3_idt95.vcf | cut -f 3 | sort -u | wc -l
-    7594
-# Total number of duplicates
-grep -v "#" 9k_morex_v3_idt95.vcf | cut -f 3 | sort | uniq -c | sort -n -r | grep -vw "1" | wc -l
-    53
+# 9k idt90
+~/GitHub/morex_reference/morex_v3/50k_9k_BOPA_SNP/scripts/summarize_snp_count.sh 9k_morex_v3_idt90.vcf 9k_morex_v3_idt90_failed.log 
+Total SNPs: 7763
+Total unique SNPs: 7679
+Total duplicate SNPs: 57
+Total failed SNPs: 117
+
+# 9k idt95
+~/GitHub/morex_reference/morex_v3/50k_9k_BOPA_SNP/scripts/summarize_snp_count.sh 9k_morex_v3_idt95.vcf 9k_morex_v3_idt95_failed.log 
+Total SNPs: 7674
+Total unique SNPs: 7594
+Total duplicate SNPs: 53
+Total failed SNPs: 205
 ```
 
-After running `snp_utils.py`, we get:
-7,594 SNPs without duplicates
-53 SNPs with duplicates
-205 failed SNPs
+Add chromosome lengths to header lines so that the VCF works with GATK's Variant Recalibrator.
 
-**Step 2:** Resolve duplicate SNPs
+```bash
+# 9K parts ref
+~/GitHub/morex_reference/morex_v2/50k_9k_BOPA_SNP/scripts/add_contig_length_to_header.sh 9k_idt95_noRescuedSNPs_partsRef.vcf ~/Shared/References/Reference_Sequences/Barley/Morex_v3/Barley_MorexV3_pseudomolecules_parts.dict
+~/GitHub/morex_reference/morex_v2/50k_9k_BOPA_SNP/scripts/add_contig_length_to_header.sh 9k_idt90_noRescuedSNPs_partsRef.vcf ~/Shared/References/Reference_Sequences/Barley/Morex_v3/Barley_MorexV3_pseudomolecules_parts.dict
+# 9K pseudomolecules ref
+~/GitHub/morex_reference/morex_v2/50k_9k_BOPA_SNP/scripts/add_contig_length_to_header.sh 9k_idt95_noRescuedSNPs.vcf ~/Shared/References/Reference_Sequences/Barley/Morex_v3/Barley_MorexV3_pseudomolecules.dict
+~/GitHub/morex_reference/morex_v2/50k_9k_BOPA_SNP/scripts/add_contig_length_to_header.sh 9k_idt90_noRescuedSNPs.vcf ~/Shared/References/Reference_Sequences/Barley/Morex_v3/Barley_MorexV3_pseudomolecules.dict
+```
 
+Rename files so output name is clean:
+
+```bash
+mv 9k_idt95_noRescuedSNPs_partsRef_fixedHeader.vcf 9k_idt95_noRescuedSNPs_partsRef.vcf
+mv 9k_idt95_noRescuedSNPs_fixedHeader.vcf 9k_idt95_noRescuedSNPs.vcf
+
+mv 9k_idt90_noRescuedSNPs_fixedHeader.vcf 9k_idt90_noRescuedSNPs.vcf
+mv 9k_idt90_noRescuedSNPs_partsRef_fixedHeader.vcf 9k_idt90_noRescuedSNPs_partsRef.vcf
+```
 
 ---
 
@@ -169,26 +208,6 @@ bopa	 chr5H_part2	321478839	11_10092	T	C	.	.	B
 
 BOPA idt95 vs 9k idt90 have one discordant SNP. Remaining don't have discordant BOPA SNPs. For the discordant SNPs in `temp_discordant_bopa_idt95_and_9k_idt90_snps.txt`, we manually blasted the contextual sequence using IPK's BLAST server to investigate.
 
-Add chromosome lengths to header lines so that the VCF works with GATK's Variant Recalibrator.
-
-```bash
-# In dir: ~/Shared/References/Reference_Sequences/Barley/Morex_v3/bopa_9k_50k
-# BOPA parts ref
-~/GitHub/morex_reference/morex_v2/50k_9k_BOPA_SNP/scripts/add_contig_length_to_header.sh bopa_idt95_noRescuedSNPs_partsRef.vcf ~/Shared/References/Reference_Sequences/Barley/Morex_v3/Barley_MorexV3_pseudomolecules_parts.dict
-# BOPA pseudomolecules ref
-~/GitHub/morex_reference/morex_v2/50k_9k_BOPA_SNP/scripts/add_contig_length_to_header.sh bopa_idt95_noRescuedSNPs.vcf ~/Shared/References/Reference_Sequences/Barley/Morex_v3/Barley_MorexV3_pseudomolecules.dict
-
-# 9K parts ref
-~/GitHub/morex_reference/morex_v2/50k_9k_BOPA_SNP/scripts/add_contig_length_to_header.sh 9k_idt95_noRescuedSNPs_partsRef.vcf ~/Shared/References/Reference_Sequences/Barley/Morex_v3/Barley_MorexV3_pseudomolecules_parts.dict
-# 9K pseudomolecules ref
-~/GitHub/morex_reference/morex_v2/50k_9k_BOPA_SNP/scripts/add_contig_length_to_header.sh 9k_idt95_noRescuedSNPs.vcf ~/Shared/References/Reference_Sequences/Barley/Morex_v3/Barley_MorexV3_pseudomolecules.dict
-
-# 50K parts ref
-~/GitHub/morex_reference/morex_v2/50k_9k_BOPA_SNP/scripts/add_contig_length_to_header.sh 50k_idt95_noRescuedSNPs_partsRef.vcf ~/Shared/References/Reference_Sequences/Barley/Morex_v3/Barley_MorexV3_pseudomolecules_parts.dict
-# 50K pseudomolecules ref
-~/GitHub/morex_reference/morex_v2/50k_9k_BOPA_SNP/scripts/add_contig_length_to_header.sh 50k_idt95_noRescuedSNPs.vcf ~/Shared/References/Reference_Sequences/Barley/Morex_v3/Barley_MorexV3_pseudomolecules.dict
-```
-
 ---
 
 ### Methods: 50K
@@ -206,27 +225,38 @@ bash run_snp_utils-50K_idt90.sh
 Summarizing SNPs:
 
 ```bash
-# Total number of SNPs
-grep -v "#" 50k_morex_v3_idt95.vcf | cut -f 3 | wc -l
-    44333
-# Total number of unique SNPs
-grep -v "#" 50k_morex_v3_idt95.vcf | cut -f 3 | sort -u | wc -l
-    43488
-# Total number of duplicates
-grep -v "#" 50k_morex_v3_idt95.vcf | cut -f 3 | sort | uniq -c | sort -n -r | grep -vw "1" | wc -l
-    602
+# 50k idt90
+~/GitHub/morex_reference/morex_v3/50k_9k_BOPA_SNP/scripts/summarize_snp_count.sh 50k_morex_v3_idt90.vcf 50k_morex_v3_idt90_failed.log 
+Total SNPs: 44801
+Total unique SNPs: 43942
+Total duplicate SNPs: 617
+Total failed SNPs: 89
+
+# 50k idt95
+~/GitHub/morex_reference/morex_v3/50k_9k_BOPA_SNP/scripts/summarize_snp_count.sh 50k_morex_v3_idt95.vcf 50k_morex_v3_idt95_failed.log 
+Total SNPs: 44333
+Total unique SNPs: 43488
+Total duplicate SNPs: 602
+Total failed SNPs: 548
 ```
 
-After running `snp_utils.py`, we get:
-43,488 Total SNPs (unique)
-602 SNPs with duplicates
-548 failed SNPs
-
-Make a list of duplicate SNPs and remove duplicates from main VCFs:
+Add chromosome lengths to header lines so that the VCF works with GATK's Variant Recalibrator.
 
 ```bash
-# In dir: ~/Shared/References/Reference_Sequences/Barley/Morex_v3/bopa_9k_50k
-# idt95
-grep -v "#" 50k_idt95_noRescuedSNPs.vcf | wc -l
-    41813
+# idt90
+# 50K parts ref
+~/GitHub/morex_reference/morex_v2/50k_9k_BOPA_SNP/scripts/add_contig_length_to_header.sh 50k_idt90_noRescuedSNPs_partsRef_cleanNamesBOPA.vcf ~/Shared/References/Reference_Sequences/Barley/Morex_v3/Barley_MorexV3_pseudomolecules_parts.dict
+# 50K pseudomolecules ref
+~/GitHub/morex_reference/morex_v2/50k_9k_BOPA_SNP/scripts/add_contig_length_to_header.sh 50k_idt90_noRescuedSNPs.vcf ~/Shared/References/Reference_Sequences/Barley/Morex_v3/Barley_MorexV3_pseudomolecules.dict
+```
+
+Rename files so output name is clean:
+
+```bash
+mv 50k_idt90_noRescuedSNPs_fixedHeader.vcf 50k_idt90_noRescuedSNPs.vcf
+mv 50k_idt90_noRescuedSNPs_partsRef_cleanNamesBOPA_fixedHeader.vcf 50k_idt90_noRescuedSNPs_partsRef.vcf
+rm 50k_idt90_noRescuedSNPs_partsRef_cleanNamesBOPA.vcf
+
+mv 50k_idt95_noRescuedSNPs_partsRef_fixedHeader.vcf 50k_idt95_noRescuedSNPs_partsRef.vcf
+mv 50k_idt95_noRescuedSNPs_fixedHeader.vcf 50k_idt95_noRescuedSNPs.vcf
 ```
