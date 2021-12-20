@@ -12,6 +12,22 @@ This directory contains the scripts used to re-map the BOPA, 9k iSelect, and 50k
 - [Check overlapping BOPA and 9k iSelect SNPs](#check-overlapping-bopa-and-9k-iselect-snps)
 - [Methods: 50k iSelect](#methods-50k-iselect)
 
+### Overview
+
+Summary of the number of bopa, 9K, and 50K SNPs that had unique alignments:
+
+Files below are in the directory:
+
+```bash
+/panfs/roc/groups/9/morrellp/shared/References/Reference_Sequences/Barley/Morex_v2/bopa_9k_50k
+```
+
+| BOPA, 9K, and 50K VCF | Number of SNPs |
+| --------------------- | -------------- |
+| `50k_morex_v2_idt90_parts.vcf` | 44,006 SNPs |
+| `9k_morex_v2_idt90_parts.vcf` | 7,767 SNPs |
+| `BOPA_morex_v2_idt90_parts.vcf` | 3,030 SNPs |
+
 ---
 
 ## Data
