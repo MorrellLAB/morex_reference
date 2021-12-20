@@ -102,77 +102,6 @@ Total duplicate SNPs: 4
 Total failed SNPs: 19
 ```
 
-After duplicate SNPs have been removed, we have these totals:
-
-```bash
-# In dir: ~/Shared/References/Reference_Sequences/Barley/Morex_v3/bopa_9k_50k
-# idt90
-grep -v "#" bopa_morex_v3_idt90.vcf | wc -l
-    3014
-```
-
-For the ones that failed, we will "manually" BLAST using the IPK server: https://webblast.ipk-gatersleben.de/barley_ibsc/. Previously (for Morex v1), Li had many undergrads help us manually BLAST search the duplicate and failed SNPs. But, this is somewhat more prone to human error and is not possible without a many undergrads. So, we will use the script below to resolve the duplicates and failed SNPs by parsing an HTML file containg the IPK Barley BLAST server results. (*Note:* this is the same script we used when processing positions relative to Morex v2)
-
-**Step 2:** Resolve duplicate SNPs
-
-Let's resolve the duplicate SNPs, since there are only a few, we can do this manually.
-
-List of BOPA SNPs with duplicates:
-
-```bash
-# In dir: ~/Shared/References/Reference_Sequences/Barley/Morex_v3/bopa_9k_50k
-grep -v "#" BOPA_morex_v3_idt90.vcf | cut -f 3 | sort | uniq -c | sort -n -r | grep -vw "1"
-      2 12_31396
-      2 12_30861
-      2 12_30822
-      2 11_20074
-```
-
-The general steps are as follows: Check if SNP hits a gene by searching in the [SNPMeta output file](https://conservancy.umn.edu/bitstream/handle/11299/181367/Barley_SNP_Annotations.txt?sequence=5&isAllowed=y). This step is intended to reduce noise since we expect all the BOPA and 9k SNPs to only be in genic regions. If there is a gene hit, BLAST search the gene with IPK server, pick the best hit, and write notes in the INFO field of the VCF. If there is no hit, choose the smallest position (smallest chromosome and smallest physical position) and write notes in the INFO field of the VCF file.
-
-We will list ALTCHR first before ALTPOS since that is the format that was already present in the current VCF file we are working with. Example:
-> ALTCHR=chr7H,chr7H;ALTPOS=6011918,6045065;B
-
-We will repeat this process for the remaining duplicates. 
-
-**Step 2a:** First search the [SNP meta file for the 9k SNPs](https://conservancy.umn.edu/bitstream/handle/11299/181367/Barley_SNP_Annotations.txt?sequence=5&isAllowed=y) and figure out which gene the SNP is located.
-
-We'll do this programmatically by downloading the SNPMeta output file containing info for SNPs hitting genes and generate a list of protein IDs associated with the SNP.
-
-```bash
-# In dir: ~/Shared/References/Reference_Sequences/Barley/Morex_v3/bopa_9k_50k/temp
-# Download SNPMeta output file
-wget https://conservancy.umn.edu/bitstream/handle/11299/181367/Barley_SNP_Annotations.txt?sequence=5&isAllowed=y
-# Cleanup output file name
-mv Barley_SNP_Annotations.txt\?sequence\=5 Barley_SNP_Annotations.txt
-
-# In dir: ~/Shared/References/Reference_Sequences/Barley/Morex_v3/bopa_9k_50k/duplicate_snps
-# Generate list of protein IDs associated with the SNP
-grep -f bopa_idt90_duplicate_snp_names.txt ~/Shared/References/Reference_Sequences/Barley/Morex_v3/bopa_9k_50k/temp/Barley_SNP_Annotations.txt | cut -f 1,4
-11_20074	BAJ97892.1
-12_30822	BAK06853.1
-12_30861	ABV59386.1
-12_31396	-
-
-grep -f bopa_idt90_duplicate_snp_names.txt ~/Shared/References/Reference_Sequences/Barley/Morex_v3/bopa_9k_50k/temp/Barley_SNP_Annotations.txt | cut -f 4 | grep -v "-" > bopa_idt90_duplicate_snps_proteinIDs.txt
-```
-
-The purpose for this is to reduce noise since we know that the 9k iSelect genotyping was designed from exome capture samples.
-
-If we find the SNP in the SNP meta file, copy the ProteinID for that SNP and go to NCBI https://www.ncbi.nlm.nih.gov/protein and search that protein. This will take you to a page where you can get the fasta sequence for that ProteinID. Due to changes in how IPK's BLAST server is set up, we'll need to generate a single file containing the FASTA sequences from the NCBI protein database. Copy the FASTA sequence into a the file: `~/Shared/References/Reference_Sequences/Barley/Morex_v3/bopa_9k_50k/duplicate_snps/bopa_idt90_duplicate_snp_proteinIDs.fasta`
-
-**Step 2b:** Take the fasta sequence and use the [IPK Barley BLAST server](https://webblast.ipk-gatersleben.de/barley_ibsc/) to do a BLAST search.
-
-Navigate to "Blast barley genomes" > "NBCI BLAST+ blastp". Then select the following:
-
-- Protein query sequence(s): Select `Single dataset` and then upload fasta file `bopa_idt90_duplicate_snp_proteinIDs.fasta`
-- Subject database/sequences: Select `Locally installed BLAST database` then under the "Protein BLAST database" section select `Barley all Proteins Morex V3 (Jul 2020)`
-- Type of BLAST: `blastp`
-- Set expectation value cutoff: `0.001`
-- Output format: `Tabular (extended 25 columns)`
-
-Resolved duplicates are in the file `bopa_duplicates_idt90_resolved.vcf` and will be combined with the file `temp_bopa_idt90_noDups.vcf` and failed SNPs (see step 3) later on and sorted.
-
 ---
 
 ### Methods: 9K
@@ -221,12 +150,24 @@ Check for BOPA and 9k position concordance. For now, we'll check the `*_noRescue
 
 ```bash
 # In dir: ~/Shared/References/Reference_Sequences/Barley/Morex_v3/bopa_9k_50k
-module load python3/3.8.3_anaconda2020.07_mamba(default)
+module load python3/3.8.3_anaconda2020.07_mamba
 
 ~/GitHub/morex_reference/morex_v2/50k_9k_BOPA_SNP/scripts/check_position_concordance.py bopa_idt95_noRescuedSNPs_partsRef.vcf 9k_idt95_noRescuedSNPs_partsRef.vcf > temp_discordant_bopa_9k_snps.txt
+
+~/GitHub/morex_reference/morex_v2/50k_9k_BOPA_SNP/scripts/check_position_concordance.py bopa_idt95_noRescuedSNPs_partsRef.vcf 9k_idt90_noRescuedSNPs_partsRef.vcf > temp_discordant_bopa_idt95_and_9k_idt90_snps.txt
+
+cat temp_discordant_bopa_idt95_and_9k_idt90_snps.txt
+# Output
+9k	 chr2H_part2	319699727	11_10092	T	C	.	.	B
+bopa	 chr5H_part2	321478839	11_10092	T	C	.	.	B
+
+# BOPA and 50k BOPA SNPs
+~/GitHub/morex_reference/morex_v2/50k_9k_BOPA_SNP/scripts/check_position_concordance.py bopa_idt95_noRescuedSNPs_partsRef.vcf 50k_idt95_noRescuedSNPs_partsRef_cleanNamesBOPA.vcf > temp_discordant_bopa_idt95_and_50k_idt95_snps.txt
+
+~/GitHub/morex_reference/morex_v2/50k_9k_BOPA_SNP/scripts/check_position_concordance.py bopa_idt95_noRescuedSNPs_partsRef.vcf 50k_idt90_noRescuedSNPs_partsRef_cleanNamesBOPA.vcf > temp_discordant_bopa_idt95_and_50k_idt90_snps.txt
 ```
 
-There are no discordant SNP positions.
+BOPA idt95 vs 9k idt90 have one discordant SNP. Remaining don't have discordant BOPA SNPs. For the discordant SNPs in `temp_discordant_bopa_idt95_and_9k_idt90_snps.txt`, we manually blasted the contextual sequence using IPK's BLAST server to investigate.
 
 Add chromosome lengths to header lines so that the VCF works with GATK's Variant Recalibrator.
 
