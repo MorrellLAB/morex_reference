@@ -10,11 +10,8 @@ module load python3/3.8.3_anaconda2020.07_mamba
 VCF="$1"
 PREFIX="$2"
 OUT_DIR="$3"
-
-# These are set for Morex v3
-PSEUDO_TO_PARTS_SCRIPT="/panfs/roc/groups/9/morrellp/liux1299/GitHub/File_Conversions/Barley_Pseudomolecules_to_Parts.py"
-# See script ~/GitHub/File_Conversions/Barley_Pseudomolecules_to_Parts.py for a list of valid options
-REF_VERSION="morex_v3"
+PSEUDO_TO_PARTS_SCRIPT="$4"
+REF_VERSION="$5"
 
 #------------------------
 # Check if out dir and out subdir exist, if not make them

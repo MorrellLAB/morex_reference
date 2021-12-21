@@ -20,6 +20,10 @@ DISTANCE_THRESHOLD="100000"
 SNP_ARRAY="9k"
 PERCENT_IDENTITY="95"
 OUT_PREFIX="${SNP_ARRAY}_morex_v3_idt${PERCENT_IDENTITY}"
+# These are set for Morex v3
+PSEUDO_TO_PARTS_SCRIPT="/panfs/roc/groups/9/morrellp/liux1299/GitHub/File_Conversions/Barley_Pseudomolecules_to_Parts.py"
+# See script ~/GitHub/File_Conversions/Barley_Pseudomolecules_to_Parts.py for a list of valid options
+REF_VERSION="morex_v3"
 
 #--------------------
 # Go into output directory
@@ -33,4 +37,4 @@ snp_utils.py BLAST -l ${LOOKUP_TABLE} -c blast_${OUT_PREFIX} -b -m ${GENETIC_MAP
 
 # Remove duplicate SNPs from the VCF
 # This outputs a VCF with the naming scheme *noRescuedSNPs.vcf
-remove_duplicates_from_vcf.sh ${OUT_PREFIX}.vcf ${SNP_ARRAY}_idt${PERCENT_IDENTITY} ${OUT_DIR}
+remove_duplicates_from_vcf.sh ${OUT_PREFIX}.vcf ${SNP_ARRAY}_idt${PERCENT_IDENTITY} ${OUT_DIR} ${PSEUDO_TO_PARTS_SCRIPT} ${REF_VERSION}
