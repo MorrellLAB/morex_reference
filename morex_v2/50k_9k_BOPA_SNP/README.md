@@ -24,6 +24,7 @@ Files below are in the directory:
 
 | BOPA, 9K, and 50K VCF | Number of SNPs |
 | --------------------- | -------------- |
+| `50k_idt95_noRescuedSNPs_partsRef.vcf` | 41,847 SNPs |
 | `50k_morex_v2_idt90_parts.vcf` | 44,006 SNPs |
 | `9k_idt95_noRescuedSNPs_partsRef.vcf` | 7,544 SNPs |
 | `9k_morex_v2_idt90_parts.vcf` | 7,767 SNPs |
