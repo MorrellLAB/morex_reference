@@ -13,3 +13,18 @@ Run scripts in `prep_reference` subdirectory to get reference genome ready for d
 ## Step 2: Get Morex v3 BOPA, 9K, and 50K positions
 
 Run scripts in `50k_9k_BOPA_SNP` subdirectory. See readme in subdirectory for detailed documentation.
+
+## Step 3: Find stretches of N's in reference
+
+Get a BED file of places in the reference where there are stretches of N's.
+
+```bash
+# In dir: ~/GitHub/morex_reference/morex_v3
+module load python3/3.8.3_anaconda2020.07_mamba
+# Find stretches of N's in reference genome
+# partsRef
+./find_Ns_in_assembly.py /panfs/roc/groups/9/morrellp/shared/References/Reference_Sequences/Barley/Morex_v3/Barley_MorexV3_pseudomolecules_parts.fasta > /panfs/roc/groups/9/morrellp/shared/References/Reference_Sequences/Barley/Morex_v3/stretches_of_Ns/Barley_MorexV3_pseudomolecules_parts_missing.bed
+
+# pseudomolecules
+./find_Ns_in_assembly.py /panfs/roc/groups/9/morrellp/shared/References/Reference_Sequences/Barley/Morex_v3/Barley_MorexV3_pseudomolecules.fasta > /panfs/roc/groups/9/morrellp/shared/References/Reference_Sequences/Barley/Morex_v3/stretches_of_Ns/Barley_MorexV3_pseudomolecules_missing.bed
+```
