@@ -4,6 +4,8 @@ This directory contains scripts and submodules for file processing/creation that
 
 Morex v3 reference genome can be accessed through e!DAL - Plant Genomics & Phenomics Research Data Repository: http://dx.doi.org/10.5447/ipk/2021/3
 
+Phytozome V13 has Morex v3 annotations (including repeat annotations) and assembly files available here: https://data.jgi.doe.gov/refine-download/phytozome?organism=HvulgareMorex&expanded=702
+
 ---
 
 ## Step 1: Prepare Reference
