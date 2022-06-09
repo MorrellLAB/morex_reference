@@ -16,7 +16,7 @@ Run scripts in `prep_reference` subdirectory to get reference genome ready for d
 
 Run scripts in `50k_9k_BOPA_SNP` subdirectory. See readme in subdirectory for detailed documentation.
 
-## Step 3: Find stretches of N's in reference
+## Step 3: Find stretches of N's in reference and softmasked regions
 
 Get a BED file of places in the reference where there are stretches of N's.
 
@@ -29,4 +29,20 @@ module load python3/3.8.3_anaconda2020.07_mamba
 
 # pseudomolecules
 ./find_Ns_in_assembly.py /panfs/roc/groups/9/morrellp/shared/References/Reference_Sequences/Barley/Morex_v3/Barley_MorexV3_pseudomolecules.fasta > /panfs/roc/groups/9/morrellp/shared/References/Reference_Sequences/Barley/Morex_v3/stretches_of_Ns/Barley_MorexV3_pseudomolecules_missing.bed
+```
+
+Generate BED file of hardmasked and softmasked regions in the Phytozome 13 Morex v3 reference assembly files.
+
+```bash
+# In dir: /panfs/roc/groups/9/morrellp/shared/References/Reference_Sequences/Barley/Morex_v3/PhytozomeV13_HvulgareMorex_V3/assembly
+module load python3/3.8.3_anaconda2020.07_mamba
+# partsRef hardmasked
+~/GitHub/morex_reference/morex_v3/find_Ns_in_assembly.py HvulgareMorex_702_V3.hardmasked_parts.fasta > HvulgareMorex_702_V3.hardmasked_parts.bed
+# partsRef softmasked
+~/GitHub/morex_reference/morex_v3/find_softmasked_in_assembly.py HvulgareMorex_702_V3.softmasked_parts.fasta > HvulgareMorex_702_V3.softmasked_parts.bed
+
+# pseudomolecules hardmasked
+~/GitHub/morex_reference/morex_v3/find_Ns_in_assembly.py HvulgareMorex_702_V3.hardmasked.fa > HvulgareMorex_702_V3.hardmasked.bed
+# pseudomolecules softmasked
+~/GitHub/morex_reference/morex_v3/find_softmasked_in_assembly.py HvulgareMorex_702_V3.softmasked.fa > HvulgareMorex_702_V3.softmasked.bed
 ```
