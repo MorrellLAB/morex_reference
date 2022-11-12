@@ -46,3 +46,10 @@ module load python3/3.8.3_anaconda2020.07_mamba
 # pseudomolecules softmasked
 ~/GitHub/morex_reference/morex_v3/find_softmasked_in_assembly.py HvulgareMorex_702_V3.softmasked.fa > HvulgareMorex_702_V3.softmasked.bed
 ```
+
+Mask low complexity regions using [JGI's bbmask](https://jgi.doe.gov/data-and-tools/software-tools/bbtools/bb-tools-user-guide/bbmask-guide/).
+
+```bash
+# In dir: ~/GitHub/morex_reference/morex_v3
+sbatch mask_low_complexity.sh
+```
