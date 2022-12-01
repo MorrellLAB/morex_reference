@@ -36,4 +36,9 @@ done
 
 # Add chrUn
 curr_chr_end=$(grep chrUn ${ref_fai} | cut -f 2)
-printf "chrUn\t0\t${curr_chr_end}\tchrUn\n" >> ${out_dir}/${out_prefix}.bed
+printf "chrUn\t0\t${curr_chr_end}\tchrUn\n" >> ${out_dir}/temp_${out_prefix}.bed
+
+# Create parts.bed with new chromosome names in the first column
+grep -v "#CHROM" ${out_dir}/temp_${out_prefix}.bed | awk '{ print $4"\t"$2"\t"$3 }' > ${out_dir}/${out_prefix}.bed
+# Create version without chrUn
+grep -v "chrUn" ${out_dir}/${out_prefix}.bed > ${out_dir}/${out_prefix}.nochrUn.bed
