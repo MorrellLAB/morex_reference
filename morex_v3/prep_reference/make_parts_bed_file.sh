@@ -4,11 +4,11 @@ set -e
 set -o pipefail
 
 # User provided input arguments
-cent_pos="/panfs/roc/groups/9/morrellp/shared/References/Reference_Sequences/Barley/Morex_v3/centromere_positions/MorexV3_centromere_positions.tsv"
+cent_pos="/panfs/jay/groups/9/morrellp/shared/References/Reference_Sequences/Barley/Morex_v3/centromere_positions/MorexV3_centromere_positions.tsv"
 
-ref_fai="/panfs/roc/groups/9/morrellp/shared/References/Reference_Sequences/Barley/Morex_v3/Barley_MorexV3_pseudomolecules.fasta.fai"
+ref_fai="/panfs/jay/groups/9/morrellp/shared/References/Reference_Sequences/Barley/Morex_v3/Barley_MorexV3_pseudomolecules.fasta.fai"
 
-out_dir="/panfs/roc/groups/9/morrellp/shared/References/Reference_Sequences/Barley/Morex_v3"
+out_dir="/panfs/jay/groups/9/morrellp/shared/References/Reference_Sequences/Barley/Morex_v3"
 
 out_prefix="parts"
 

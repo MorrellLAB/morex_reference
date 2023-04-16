@@ -32,6 +32,8 @@ module load R/4.0.4
 
 Pericentromere positions are also listed in the table below:
 
+**Note:** chr6H pericentromere positions doesn't make sense, it doesn't overlap the centromere. The approach used here doesn't seem to work well for chr6H. chr6H will need to be determined another way.
+
 | Chr | Start | End |
 | --- | ----- | --- |
 | chr1H | NA | NA |
@@ -39,7 +41,18 @@ Pericentromere positions are also listed in the table below:
 | chr3H | 97202374 | 397494503 |
 | chr4H | 52116492 | 496024940 |
 | chr5H | 54152588 | 328984081 |
-| chr6H | 343875085 | 345879621 |
+| chr6H | ~~343875085~~ | ~~345879621~~ |
 | chr7H | 192266334 | 434396272 |
+
+Centromere positions:
+
+| Chr | Centromere |
+| chr1H | 206486643 |
+| chr2H | 301293086 |
+| chr3H | 267852507 |
+| chr4H | 276149121 |
+| chr5H | 204878572 |
+| chr6H | 256319444 |
+| chr7H | 328847192 |
 
 Currently, we are not able to figure out positions for chr1H. Previously, for Morex v1 Tom found the pericentromere positions (including chr1H) by using Supplemental Table 4.4 from [Mascher et al 2017 Nature](https://www.nature.com/articles/nature22043). We may consider a similar approach to Casale et al. 2021 in defining chr1H pericentromere positions but we'll need to explore this further first.
