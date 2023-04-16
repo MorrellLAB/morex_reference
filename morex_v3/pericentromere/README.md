@@ -47,6 +47,7 @@ Pericentromere positions are also listed in the table below:
 Centromere positions:
 
 | Chr | Centromere |
+| --- | ---------- |
 | chr1H | 206486643 |
 | chr2H | 301293086 |
 | chr3H | 267852507 |
