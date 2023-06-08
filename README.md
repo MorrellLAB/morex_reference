@@ -2,7 +2,7 @@
 
 Preparation and processing steps related to all versions of the morex reference genome.
 
-All detailed methods/documentation are within each of the subdirectories `morex_v1`, `morex_v2`, etc.
+All detailed methods/documentation are within each of the subdirectories `morex_v1`, `morex_v2`, and `morex_v3`.
 
 ## Important instructions to get all submodules within this repository
 
