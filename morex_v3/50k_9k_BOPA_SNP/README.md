@@ -260,3 +260,10 @@ rm 50k_idt90_noRescuedSNPs_partsRef_cleanNamesBOPA.vcf
 mv 50k_idt95_noRescuedSNPs_partsRef_fixedHeader.vcf 50k_idt95_noRescuedSNPs_partsRef.vcf
 mv 50k_idt95_noRescuedSNPs_fixedHeader.vcf 50k_idt95_noRescuedSNPs.vcf
 ```
+
+Add a merged file with all of the SNPs from genotyping platforms
+
+```bash
+bcftools merge bopa_idt90_noRescuedSNPs.vcf.gz 9k_idt90_noRescuedSNPs.vcf.gz 50k_idt90_noRescuedSNPs.vcf.gz -Oz -o 50k_9k_bopa_idt90_noRescuedSNPs.vcf.gz
+```
+Total SNPs: 43833
