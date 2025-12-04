@@ -18,7 +18,7 @@ module load pigz
 ANCHORWAVE="/users/6/pmorrell/Apps/anchorwave/anchorwave"
 OUTPUT_DIR="/scratch.global/pmorrell/Ancestral/Anchorwave"
 REF_FASTA="/panfs/jay/groups/9/morrellp/shared/References/Reference_Sequences/Barley/Morex_v3/Barley_MorexV3_pseudomolecules.fasta"
-GFF3="/scratch.global/pmorrell/Ancestral/sorted.gff3"
+GFF3="/scratch.global/pmorrell/Ancestral/Hv_Morex.pgsb.Jul2020.re_sorted.gff3"
 
 mkdir -p "${OUTPUT_DIR}"
 
